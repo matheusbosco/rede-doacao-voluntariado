@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}{{ ong.nome }}{% endblock %}
+{% block conteudo %}
+<p><a href="{% url 'ong-lista' %}">Ver ONGs</a></p>
+<h1>{{ ong.nome }}</h1>
+<p>Status: {{ ong.get_status_display }}</p>
+<p class="ajuda">Aprovação não garante idoneidade; confira as informações</p>
+{% if dono and ong.status == "recusada" %}<p>Motivo da recusa: {{ ong.motivo_analise }}</p>{% endif %}
+<h2>Sobre a ONG</h2>
+<p>{{ ong.causa }}</p>{{ ong.descricao|linebreaks }}
+{% if dono or user.is_staff %}<p>CNPJ: {{ ong.cnpj|default:"Não informado" }}</p>{% endif %}
+<h2>Contato</h2>
+<p>E-mail de contato: <a href="mailto:{{ ong.email_contato }}">{{ ong.email_contato }}</a></p>
+{% if ong.telefone %}<p>Telefone: {{ ong.telefone }}</p>{% endif %}
+{% if ong.site %}<p><a href="{{ ong.site }}">Site da ONG</a></p>{% endif %}
+<h2>Endereço e recebimento</h2>
+<p>{{ ong.logradouro }}, {{ ong.numero }}{% if ong.complemento %}, {{ ong.complemento }}{% endif %}<br>
+{{ ong.bairro }} · {{ ong.cidade }}/{{ ong.uf }} · CEP {{ ong.cep }}</p>
+{{ ong.instrucoes_recebimento|linebreaks }}
+{% if dono %}
+  <p><a class="botao" href="{% url 'ong-editar' ong.pk %}">Editar ONG</a></p>
+  {% if ong.status == "recusada" %}
+    <form method="post" action="{% url 'ong-reenviar' ong.pk %}">{% csrf_token %}<p><button type="submit">Reenviar para análise</button></p></form>
+  {% endif %}
+  <form method="post" action="{% url 'ong-excluir' ong.pk %}">{% csrf_token %}<button class="secundario" type="submit">Excluir ONG</button></form>
+{% endif %}
+{% endblock %}

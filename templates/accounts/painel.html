@@ -3,4 +3,7 @@
 {% block conteudo %}
 <h1>Olá, {{ user.first_name }}</h1>
 <p>Sua conta está ativa.</p>
+<p><a href="{% url 'ong-minha' %}">{% if user.ong %}Minha ONG{% else %}Cadastrar ONG{% endif %}</a></p>
+<p><a href="{% url 'ong-lista' %}">Conhecer ONGs</a></p>
+{% if user.is_staff %}<p><a href="{% url 'admin-ong-fila' %}">Fila de análise de ONGs</a></p>{% endif %}
 {% endblock %}

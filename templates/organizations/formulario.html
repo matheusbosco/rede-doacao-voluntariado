@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}{% if ong %}Editar ONG{% else %}Cadastrar ONG{% endif %}{% endblock %}
+{% block conteudo %}
+<h1>{% if ong %}Editar ONG{% else %}Cadastrar ONG{% endif %}</h1>
+<p>O cadastro passa por análise. Alterações de nome, CNPJ ou endereço exigem uma nova aprovação.</p>
+<form class="cartao formulario-ong" method="post" novalidate>
+  {% csrf_token %}
+  {% for erro in form.non_field_errors %}<div class="erro" role="alert">{{ erro }}</div>{% endfor %}
+  {% for campo in form %}
+    <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>{{ campo }}
+    {% for erro in campo.errors %}<div class="erro" role="alert">{{ erro }}</div>{% endfor %}
+    {% if campo.name == "cep" %}
+      <p><button type="button" id="consultar-cep" class="secundario">Consultar CEP</button></p>
+      <p id="mensagem-cep" aria-live="polite"></p>
+    {% endif %}
+  {% endfor %}
+  <p><button type="submit">Salvar ONG</button></p>
+  <p><a href="{% if ong %}{% url 'ong-detalhe' ong.pk %}{% else %}{% url 'painel' %}{% endif %}">Voltar</a></p>
+</form>
+<script src="{% static 'js/cep.js' %}" defer></script>
+{% endblock %}
