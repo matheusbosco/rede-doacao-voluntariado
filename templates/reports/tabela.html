@@ -1,0 +1,6 @@
+<table>
+  <thead><tr><th>Campanha</th><th>Tipo</th><th>Unidade</th><th>Meta</th><th>Total confirmado</th><th>Declaradas</th><th>Aceitas</th><th>Confirmadas</th><th>Recusadas</th><th>Canceladas</th></tr></thead>
+  <tbody>{% for linha in linhas %}
+    <tr><td>{{ linha.titulo }}</td><td>{{ linha.tipo }}</td><td>{{ linha.unidade }}</td><td>{{ linha.meta|floatformat:2 }}</td><td>{{ linha.total_confirmado|floatformat:2 }}</td><td>{{ linha.declaradas }}</td><td>{{ linha.aceitas }}</td><td>{{ linha.confirmadas }}</td><td>{{ linha.recusadas }}</td><td>{{ linha.canceladas }}</td></tr>
+  {% empty %}<tr><td colspan="10">Nenhuma campanha para estes filtros.</td></tr>{% endfor %}</tbody>
+</table>

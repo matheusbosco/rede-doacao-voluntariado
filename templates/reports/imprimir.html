@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="pt-br">
+<head><meta charset="utf-8"><title>Relatório de campanhas</title>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #999; padding: 0.3em; text-align: left; }
+@media print { @page { size: landscape; margin: 1cm; } thead { display: table-header-group; } tr { break-inside: avoid; } }
+</style></head>
+<body>
+<h1>Relatório de campanhas · {{ ong.nome }}</h1>
+{% include "reports/filtros.html" %}
+{% include "reports/tabela.html" %}
+</body></html>

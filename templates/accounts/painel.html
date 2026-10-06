@@ -3,9 +3,12 @@
 {% block conteudo %}
 <h1>Olá, {{ user.first_name }}</h1>
 <p>Sua conta está ativa.</p>
+<p><a href="{% url 'contribuicao-minhas' %}">Minhas contribuições</a></p>
 <p><a href="{% url 'ong-minha' %}">{% if user.ong %}Minha ONG{% else %}Cadastrar ONG{% endif %}</a></p>
 <p><a href="{% url 'ong-lista' %}">Conhecer ONGs</a></p>
 {% if user.ong %}
+<p><a href="{% url 'contribuicao-painel' %}">Contribuições recebidas</a></p>
+<p><a href="{% url 'relatorio-painel' %}">Relatórios</a></p>
 <p><a href="{% url 'campanha-painel' %}">Minhas campanhas</a></p>
 <p><a href="{% url 'postagem-painel' %}">Minhas postagens</a></p>
 {% endif %}

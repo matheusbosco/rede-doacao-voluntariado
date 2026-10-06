@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "integrations",
     "organizations",
     "campaigns",
+    "contributions",
+    "reports",
 ]
 
 MIDDLEWARE = [

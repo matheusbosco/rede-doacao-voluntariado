@@ -6,5 +6,7 @@ urlpatterns = [
     path("api/v1/", include("integrations.urls")),
     path("", include("organizations.urls")),
     path("", include("campaigns.urls")),
+    path("", include("contributions.urls")),
+    path("", include("reports.urls")),
     path("", include("accounts.urls")),
 ]

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block nome_usuario %}{% endblock %}
+{% block titulo %}{% if recebidas %}Contribuições recebidas{% else %}Minhas contribuições{% endif %}{% endblock %}
+{% block conteudo %}
+<h1>{% if recebidas %}Contribuições recebidas{% else %}Minhas contribuições{% endif %}</h1>
+<form method="get" class="busca" novalidate>{{ form.as_p }}<button type="submit">Filtrar</button></form>
+<div class="cartoes">
+{% for contribuicao in pagina %}
+  <article class="cartao">
+    <h2>{{ contribuicao.campanha.titulo }}</h2>
+    <p>{{ contribuicao.get_tipo_display }} · {% if contribuicao.tipo == "dinheiro" %}{{ contribuicao.valor }} BRL{% else %}{{ contribuicao.quantidade }} {{ contribuicao.campanha.unidade }}{% endif %}</p>
+    <p>{{ contribuicao.get_status_display }} · {{ contribuicao.instrucao }}</p>
+    {% if contribuicao.status == "recusada" %}<p>Motivo: {{ contribuicao.motivo_avaliacao }}</p>{% endif %}
+    {{ contribuicao.observacao|linebreaks }}
+    {% if recebidas %}
+      <p>Contato do autor: {{ contribuicao.autor.first_name }} · {{ contribuicao.autor.email }}</p>
+      {% if contribuicao.status == "declarada" or contribuicao.status == "aceita" %}
+        <form method="post" action="{% url 'contribuicao-avaliar' contribuicao.pk %}">
+          {% csrf_token %}
+          {% if contribuicao.status == "declarada" and contribuicao.tipo != "dinheiro" %}<button name="acao" value="aceitar" type="submit">Aceitar</button>{% endif %}
+          {% if contribuicao.tipo == "dinheiro" or contribuicao.status == "aceita" %}<button name="acao" value="confirmar" type="submit">Confirmar</button>{% endif %}
+        </form>
+        <form method="post" action="{% url 'contribuicao-avaliar' contribuicao.pk %}">
+          {% csrf_token %}
+          <label for="motivo-{{ contribuicao.pk }}">Motivo da recusa</label>
+          <input id="motivo-{{ contribuicao.pk }}" name="motivo" maxlength="500" required>
+          <button name="acao" value="recusar" type="submit">Recusar</button>
+        </form>
+      {% endif %}
+    {% else %}
+      {% if contribuicao.status == "declarada" %}<p><a href="{% url 'contribuicao-editar' contribuicao.pk %}">Editar</a></p>{% endif %}
+      {% if contribuicao.status == "declarada" or contribuicao.status == "aceita" %}
+        <form method="post" action="{% url 'contribuicao-cancelar' contribuicao.pk %}">{% csrf_token %}<button type="submit">Cancelar</button></form>
+      {% endif %}
+    {% endif %}
+  </article>
+{% empty %}<p>Nenhuma contribuição para estes filtros.</p>{% endfor %}
+</div>
+{% if pagina.has_other_pages %}
+<nav aria-label="Paginação">
+  {% if pagina.has_previous %}<a href="?{{ filtros }}&amp;page={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+  {% if pagina.has_next %}<a href="?{{ filtros }}&amp;page={{ pagina.next_page_number }}">Próxima</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

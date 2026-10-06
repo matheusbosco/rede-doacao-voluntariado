@@ -15,7 +15,7 @@
           <a href="{% url 'ong-lista' %}">ONGs</a>
           <a href="{% url 'campanha-lista' %}">Campanhas</a>
           {% if user.is_authenticated %}
-            <span class="ajuda">{{ user.first_name }}</span>
+            {% block nome_usuario %}<span class="ajuda">{{ user.first_name }}</span>{% endblock %}
             <form class="inline" method="post" action="{% url 'logout' %}">
               {% csrf_token %}<button type="submit" class="secundario">Sair</button>
             </form>

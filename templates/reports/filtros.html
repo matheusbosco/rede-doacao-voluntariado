@@ -1,0 +1,3 @@
+<p>Período: {{ filtros.inicio|date:"d/m/Y" }} a {{ filtros.fim|date:"d/m/Y" }} (inclusive).</p>
+<p>Campanha: {% if filtros.campanha %}{{ filtros.campanha.titulo }}{% else %}Todas{% endif %} · Tipo: {{ filtros.tipo|default:"Todos" }}</p>
+<p>Gerado em: {{ gerado_em|date:"d/m/Y H:i:s" }} (São Paulo).</p>

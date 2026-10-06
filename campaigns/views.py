@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.http import Http404
@@ -13,12 +14,13 @@ from organizations.models import Ong
 from .forms import BuscaCampanhaForm, CampanhaForm, FiltroPainelCampanhaForm
 from .models import Campanha
 from .services import ConflitoEstado, mudar_estado
+from .totais import anotar_totais
 
 
 @require_GET
 def lista(request):
     form = BuscaCampanhaForm(request.GET)
-    campanhas = Campanha.objects.select_related("ong").filter(ong__status=Ong.Status.APROVADA).exclude(status=Campanha.Status.RASCUNHO)
+    campanhas = anotar_totais(Campanha.objects.select_related("ong").filter(ong__status=Ong.Status.APROVADA).exclude(status=Campanha.Status.RASCUNHO))
     ordenacao = "-criada_em"
     if form.is_valid():
         filtros = form.cleaned_data
@@ -46,7 +48,7 @@ def lista(request):
 
 @require_GET
 def detalhe(request, pk):
-    campanha = get_object_or_404(Campanha.objects.select_related("ong"), pk=pk)
+    campanha = get_object_or_404(anotar_totais(Campanha.objects.select_related("ong")), pk=pk)
     dono = request.user.is_authenticated and campanha.ong.responsavel_id == request.user.pk
     if not dono and (campanha.ong.status != Ong.Status.APROVADA or campanha.status == Campanha.Status.RASCUNHO):
         raise Http404
@@ -61,7 +63,7 @@ def painel(request):
         messages.info(request, "Cadastre uma ONG para acessar suas campanhas.")
         return redirect("ong-nova")
     form = FiltroPainelCampanhaForm(request.GET)
-    campanhas = ong.campanhas.order_by("-criada_em", "-pk")
+    campanhas = anotar_totais(ong.campanhas.all()).order_by("-criada_em", "-pk")
     if form.is_valid():
         if form.cleaned_data["status"]:
             campanhas = campanhas.filter(status=form.cleaned_data["status"])
@@ -91,12 +93,13 @@ def nova(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def editar(request, pk):
-    campanha = get_object_or_404(Campanha, pk=pk, ong__responsavel=request.user)
-    form = CampanhaForm(request.POST if request.method == "POST" else None, instance=campanha)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Campanha atualizada.")
-        return redirect("campanha-detalhe", pk=pk)
+    with transaction.atomic():
+        campanha = get_object_or_404(Campanha.objects.select_for_update(of=("self",)), pk=pk, ong__responsavel=request.user)
+        form = CampanhaForm(request.POST if request.method == "POST" else None, instance=campanha)
+        if request.method == "POST" and form.is_valid():
+            form.save()
+            messages.success(request, "Campanha atualizada.")
+            return redirect("campanha-detalhe", pk=pk)
     return render(request, "campaigns/formulario.html", {"form": form, "campanha": campanha})
 
 

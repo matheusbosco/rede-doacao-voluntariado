@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block nome_usuario %}{% endblock %}
+{% load static %}
+{% block titulo %}{% if contribuicao %}Editar contribuição{% else %}Contribuir{% endif %}{% endblock %}
+{% block conteudo %}
+<h1>{% if contribuicao %}Editar contribuição{% elif campanha.tipo == "dinheiro" %}Declarar contribuição{% elif campanha.tipo == "item" %}Oferecer itens{% else %}Oferecer horas{% endif %}</h1>
+<p>{{ campanha.titulo }} · {{ campanha.unidade }}</p>
+{% if campanha.tipo == "dinheiro" %}<p>A plataforma não processa pagamentos. Transfira pelo meio informado pela ONG e registre aqui o valor.</p>{% endif %}
+<p>Não informe dados bancários ou pessoais sensíveis.</p>
+<form method="post" data-contribuicao novalidate>
+  {% csrf_token %}
+  {% for erro in form.non_field_errors %}<p class="erro" role="alert">{{ erro }}</p>{% endfor %}
+  {% for campo in form %}
+    <p><label for="{{ campo.id_for_label }}">{{ campo.label }}</label>{{ campo }}
+    {% for erro in campo.errors %}<span class="erro" role="alert">{{ erro }}</span>{% endfor %}</p>
+  {% endfor %}
+  <button type="submit">{% if contribuicao %}Salvar{% else %}Registrar contribuição{% endif %}</button>
+</form>
+<script src="{% static 'js/contribuicao.js' %}" defer></script>
+{% endblock %}

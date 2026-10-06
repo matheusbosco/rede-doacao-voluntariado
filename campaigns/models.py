@@ -54,9 +54,30 @@ class Campanha(models.Model):
             erros["unidade"] = f"Para este tipo, a unidade deve ser {unidades[self.tipo]}."
         if self.data_inicio and self.data_fim and self.data_fim < self.data_inicio:
             erros["data_fim"] = "A data de fim não pode ser anterior à data de início."
+        if self.pk and self.contribuicoes.exists():
+            original = Campanha.objects.only("tipo", "unidade").get(pk=self.pk)
+            for campo in ("tipo", "unidade"):
+                if getattr(self, campo) != getattr(original, campo):
+                    erros[campo] = "Tipo e unidade não podem mudar após uma contribuição."
         if erros:
             raise ValidationError(erros)
-        # Tipo e unidade serão imutáveis quando houver contribuição, na próxima etapa.
+
+    @property
+    def total_confirmado(self):
+        from .totais import anotar_totais
+
+        if "_total_confirmado" in self.__dict__:
+            return self._total_confirmado
+        return anotar_totais(Campanha.objects.filter(pk=self.pk)).values_list("total_confirmado", flat=True).get()
+
+    @total_confirmado.setter
+    def total_confirmado(self, valor):
+        # A anotação da listagem evita uma consulta por campanha.
+        self._total_confirmado = valor
+
+    @property
+    def percentual_meta(self):
+        return self.total_confirmado / self.meta * 100
 
     @property
     def disponivel(self):

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block nome_usuario %}{% endblock %}
+{% block titulo %}Relatórios{% endblock %}
+{% block conteudo %}
+<h1>Relatórios de campanhas</h1>
+<p>{{ ong.nome }} · O período usa a data de criação em São Paulo e o estado atual da contribuição.</p>
+<form method="get" class="busca" novalidate>{{ form.as_p }}<button type="submit">Gerar relatório</button></form>
+{% if gerado_em %}
+  {% include "reports/filtros.html" %}
+  <p><a href="{% url 'relatorio-exportar' %}?{{ filtros_url }}">Exportar CSV</a> · <a href="{% url 'relatorio-imprimir' %}?{{ filtros_url }}">Versão para impressão</a></p>
+  {% include "reports/tabela.html" %}
+{% endif %}
+{% endblock %}
