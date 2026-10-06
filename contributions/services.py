@@ -9,6 +9,10 @@ from organizations.models import Ong
 from .models import Contribuicao
 
 
+class AcaoIncompativel(ConflitoEstado):
+    """A ação não se aplica ao tipo, independentemente do estado atual."""
+
+
 def preencher_dados(contribuicao, dados):
     """Somente a medida, o tipo compatível e a observação podem vir do cliente."""
     if dados.get("tipo", contribuicao.tipo) != contribuicao.tipo:
@@ -68,6 +72,8 @@ def avaliar_contribuicao(contribuicao_id, responsavel, acao, motivo=""):
         if ong.status != Ong.Status.APROVADA:
             raise ValidationError("A ONG precisa de aprovação para analisar contribuições.")
         dinheiro = contribuicao.tipo == Campanha.Tipo.DINHEIRO
+        if dinheiro and acao == "aceitar":
+            raise AcaoIncompativel("Contribuições em dinheiro não têm etapa de aceite.")
         transicoes = {
             "aceitar": (["declarada"] if not dinheiro else [], "aceita"),
             "confirmar": (["declarada"] if dinheiro else ["aceita"], "confirmada"),

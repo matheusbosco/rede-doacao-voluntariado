@@ -24,5 +24,5 @@ def consultar_relatorio(ong, filtros):
         for status in Contribuicao.Status.values
     }
     return list(campanhas.annotate(**contagens).order_by("titulo", "pk").values(
-        "titulo", "tipo", "unidade", "meta", "total_confirmado", *contagens,
+        "id", "titulo", "tipo", "unidade", "meta", "total_confirmado", *contagens,
     ))

@@ -32,6 +32,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "drf_spectacular",
+    "api",
     "accounts",
     "integrations",
     "organizations",
@@ -100,6 +103,36 @@ STORAGES = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": ["api.permissions.SessaoAuthentication"],
+    "DEFAULT_PERMISSION_CLASSES": ["api.permissions.Autenticado"],
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "DEFAULT_PARSER_CLASSES": ["api.parsers.JSONLimitado"],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "api.exceptions.tratar_excecao",
+    "DEFAULT_PAGINATION_CLASS": "api.pagination.Paginacao",
+    "PAGE_SIZE": 20,
+    "COERCE_DECIMAL_TO_STRING": True,
+    "DEFAULT_THROTTLE_RATES": {
+        "publica": "60/min", "usuario": "120/min", "escrita": "30/min",
+        "login": "5/min", "cadastro": "5/min",
+    },
+}
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "DAI — API v1",
+    "DESCRIPTION": "ONGs, campanhas e contribuições declaradas. Sessão Django e CSRF nas mutações. Nenhum pagamento é processado.",
+    "VERSION": "1.0.0",
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    "SERVE_INCLUDE_SCHEMA": False,
+    "ENUM_NAME_OVERRIDES": {
+        "OngStatusEnum": [("pendente", "Pendente"), ("aprovada", "Aprovada"), ("recusada", "Recusada")],
+        "CampanhaStatusEnum": [("rascunho", "Rascunho"), ("ativa", "Ativa"), ("pausada", "Pausada"), ("encerrada", "Encerrada")],
+        "CampanhaPublicaStatusEnum": ["ativa", "pausada", "encerrada"],
+        "ContribuicaoStatusEnum": [("declarada", "Declarada"), ("aceita", "Aceita"), ("confirmada", "Confirmada"), ("recusada", "Recusada"), ("cancelada", "Cancelada")],
+    },
+}
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
