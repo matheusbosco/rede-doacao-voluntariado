@@ -37,3 +37,12 @@ button:disabled { opacity: .6; cursor: wait; }
 .cartoes .cartao { max-width: none; }
 .formulario-ong { max-width: 720px; }
 .paginacao { gap: 20px; justify-content: flex-start; height: auto; flex-wrap: wrap; }
+.badge { display: inline-block; padding: 4px 10px; border: 1px solid var(--borda); border-radius: 8px; background: var(--azul-claro); }
+input[type="checkbox"] { width: auto; min-height: auto; }
+.acoes-campanha { display: flex; flex-wrap: wrap; gap: 8px; }
+main, .cartao, .busca > div { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  header nav { height: auto; min-height: 64px; padding: 12px 0; flex-wrap: wrap; gap: 12px; }
+  nav .acoes { flex-wrap: wrap; gap: 12px; }
+  .busca, .cartoes { grid-template-columns: minmax(0, 1fr); }
+}

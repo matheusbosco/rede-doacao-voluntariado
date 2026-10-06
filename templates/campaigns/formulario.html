@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titulo %}{% if campanha %}Editar campanha{% else %}Nova campanha{% endif %}{% endblock %}
+{% block conteudo %}
+<h1>{% if campanha %}Editar campanha{% else %}Nova campanha{% endif %}</h1>
+<p>Use BRL para dinheiro, hora para horas e uma unidade como cesta para itens. A meta de itens deve ser inteira.</p>
+<form class="cartao formulario-ong" method="post" novalidate>
+  {% csrf_token %}
+  {% for erro in form.non_field_errors %}<div class="erro" role="alert">{{ erro }}</div>{% endfor %}
+  {% for campo in form %}
+    <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>{{ campo }}
+    {% for erro in campo.errors %}<div class="erro" role="alert">{{ erro }}</div>{% endfor %}
+  {% endfor %}
+  <p><button type="submit">Salvar campanha</button></p>
+  <p><a href="{% url 'campanha-painel' %}">Voltar</a></p>
+</form>
+{% endblock %}

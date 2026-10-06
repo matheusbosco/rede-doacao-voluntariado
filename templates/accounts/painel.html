@@ -5,5 +5,9 @@
 <p>Sua conta está ativa.</p>
 <p><a href="{% url 'ong-minha' %}">{% if user.ong %}Minha ONG{% else %}Cadastrar ONG{% endif %}</a></p>
 <p><a href="{% url 'ong-lista' %}">Conhecer ONGs</a></p>
+{% if user.ong %}
+<p><a href="{% url 'campanha-painel' %}">Minhas campanhas</a></p>
+<p><a href="{% url 'postagem-painel' %}">Minhas postagens</a></p>
+{% endif %}
 {% if user.is_staff %}<p><a href="{% url 'admin-ong-fila' %}">Fila de análise de ONGs</a></p>{% endif %}
 {% endblock %}

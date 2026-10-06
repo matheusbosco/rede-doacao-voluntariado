@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titulo %}{{ postagem.titulo }}{% endblock %}
+{% block conteudo %}
+<p><a href="{% url 'postagem-lista' %}">Ver postagens</a></p>
+<h1>{{ postagem.titulo }}</h1>
+<p><a href="{% url 'ong-detalhe' postagem.ong.pk %}">{{ postagem.ong.nome }}</a> · {{ postagem.criada_em }}</p>
+{{ postagem.conteudo|linebreaks }}
+{% if postagem.campanha and postagem.campanha.status != "rascunho" %}<p>Campanha: <a href="{% url 'campanha-detalhe' postagem.campanha.pk %}">{{ postagem.campanha.titulo }}</a></p>{% endif %}
+{% endblock %}

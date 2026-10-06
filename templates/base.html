@@ -12,6 +12,8 @@
       <nav aria-label="Principal">
         <a class="marca" href="{% url 'painel' %}">DAI</a>
         <div class="acoes">
+          <a href="{% url 'ong-lista' %}">ONGs</a>
+          <a href="{% url 'campanha-lista' %}">Campanhas</a>
           {% if user.is_authenticated %}
             <span class="ajuda">{{ user.first_name }}</span>
             <form class="inline" method="post" action="{% url 'logout' %}">

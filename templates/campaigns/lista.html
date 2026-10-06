@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titulo %}Campanhas{% endblock %}
+{% block conteudo %}
+<h1>Conheça as campanhas</h1>
+<form class="busca" method="get" novalidate>
+  {% for campo in form %}
+    <div><label for="{{ campo.id_for_label }}">{{ campo.label }}</label>{{ campo }}
+      {% for erro in campo.errors %}<div class="erro" role="alert">{{ erro }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+  <p><button type="submit">Buscar</button> <a href="{% url 'campanha-lista' %}">Limpar filtros</a></p>
+</form>
+<div class="cartoes">
+  {% for campanha in pagina %}
+    <article class="cartao">
+      <h2><a href="{% url 'campanha-detalhe' campanha.pk %}">{{ campanha.titulo }}</a></h2>
+      <span class="badge">{{ campanha.get_status_display }}</span>
+      <p>{{ campanha.ong.nome }} · {{ campanha.ong.cidade }}/{{ campanha.ong.uf }}</p>
+      <p>{{ campanha.descricao|truncatechars:180 }}</p>
+      <p>{{ campanha.get_tipo_display }} · Meta: {{ campanha.meta }} {{ campanha.unidade }}</p>
+      <p>Até {{ campanha.data_fim }} · {% if campanha.disponivel %}Disponível{% else %}{{ campanha.motivo_indisponibilidade }}{% endif %}</p>
+    </article>
+  {% empty %}
+    <p>Nenhum resultado para estes filtros. <a href="{% url 'campanha-lista' %}">Limpar filtros</a></p>
+  {% endfor %}
+</div>
+{% if pagina.has_other_pages %}
+  <nav class="paginacao" aria-label="Paginação">
+    {% if pagina.has_previous %}<a href="?{{ filtros }}&amp;page={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+    <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+    {% if pagina.has_next %}<a href="?{{ filtros }}&amp;page={{ pagina.next_page_number }}">Próxima</a>{% endif %}
+  </nav>
+{% endif %}
+{% endblock %}

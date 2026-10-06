@@ -1,8 +1,14 @@
 from django.urls import path
 
-from . import views
+from . import postagens, views
 
 urlpatterns = [
+    path("postagens/", postagens.lista, name="postagem-lista"),
+    path("postagens/<int:pk>/", postagens.detalhe, name="postagem-detalhe"),
+    path("painel/postagens/", postagens.painel, name="postagem-painel"),
+    path("painel/postagens/nova/", postagens.nova, name="postagem-nova"),
+    path("painel/postagens/<int:pk>/editar/", postagens.editar, name="postagem-editar"),
+    path("painel/postagens/<int:pk>/excluir/", postagens.excluir, name="postagem-excluir"),
     path("ongs/", views.lista, name="ong-lista"),
     path("ongs/nova/", views.nova, name="ong-nova"),
     path("ongs/minha/", views.minha, name="ong-minha"),

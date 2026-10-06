@@ -42,7 +42,14 @@ def detalhe(request, pk):
     dono = request.user.is_authenticated and ong.responsavel_id == request.user.pk
     if ong.status != Ong.Status.APROVADA and not (dono or request.user.is_staff):
         raise Http404
-    return render(request, "organizations/detalhe.html", {"ong": ong, "dono": dono})
+    campanhas = ong.campanhas.exclude(status="rascunho").order_by("-criada_em", "-pk")
+    postagens = ong.postagens.filter(publicada=True).order_by("-criada_em", "-pk")
+    if ong.status != Ong.Status.APROVADA:
+        campanhas = campanhas.none()
+        postagens = postagens.none()
+    return render(request, "organizations/detalhe.html", {
+        "ong": ong, "dono": dono, "campanhas": campanhas, "postagens": postagens,
+    })
 
 
 @login_required

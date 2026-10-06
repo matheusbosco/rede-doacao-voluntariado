@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}{{ campanha.titulo }}{% endblock %}
+{% block conteudo %}
+<p><a href="{% url 'campanha-lista' %}">Ver campanhas</a></p>
+<h1>{{ campanha.titulo }}</h1>
+<p><a href="{% url 'ong-detalhe' campanha.ong.pk %}">{{ campanha.ong.nome }}</a></p>
+<span class="badge">{{ campanha.get_status_display }}</span>
+{{ campanha.descricao|linebreaks }}
+<p>Tipo: {{ campanha.get_tipo_display }}</p>
+<p>Unidade: {{ campanha.unidade }}</p>
+<p>Meta: {{ campanha.meta }}</p>
+<p>Início: {{ campanha.data_inicio }} · Fim: {{ campanha.data_fim }}</p>
+<p>{% if campanha.disponivel %}Disponível hoje{% else %}Indisponível: {{ campanha.motivo_indisponibilidade }}{% endif %}</p>
+<h2>Instruções de recebimento</h2>
+{{ campanha.ong.instrucoes_recebimento|linebreaks }}
+<p class="ajuda">Aprovação não garante idoneidade; confira as informações</p>
+{% if dono %}<p><a href="{% url 'campanha-editar' campanha.pk %}">Editar campanha</a> · <a href="{% url 'campanha-painel' %}">Minhas campanhas</a></p>{% endif %}
+{% endblock %}

@@ -17,6 +17,25 @@
 <p>{{ ong.logradouro }}, {{ ong.numero }}{% if ong.complemento %}, {{ ong.complemento }}{% endif %}<br>
 {{ ong.bairro }} · {{ ong.cidade }}/{{ ong.uf }} · CEP {{ ong.cep }}</p>
 {{ ong.instrucoes_recebimento|linebreaks }}
+<h2>Campanhas</h2>
+<div class="cartoes">
+  {% for campanha in campanhas %}
+    <article class="cartao">
+      <h3><a href="{% url 'campanha-detalhe' campanha.pk %}">{{ campanha.titulo }}</a></h3>
+      <span class="badge">{{ campanha.get_status_display }}</span>
+      <p>{{ campanha.descricao|truncatechars:180 }}</p>
+    </article>
+  {% empty %}<p>Nenhuma campanha pública.</p>{% endfor %}
+</div>
+<h2>Postagens</h2>
+<div class="cartoes">
+  {% for postagem in postagens %}
+    <article class="cartao">
+      <h3><a href="{% url 'postagem-detalhe' postagem.pk %}">{{ postagem.titulo }}</a></h3>
+      <p>{{ postagem.conteudo|truncatechars:180 }}</p>
+    </article>
+  {% empty %}<p>Nenhuma postagem publicada.</p>{% endfor %}
+</div>
 {% if dono %}
   <p><a class="botao" href="{% url 'ong-editar' ong.pk %}">Editar ONG</a></p>
   {% if ong.status == "recusada" %}

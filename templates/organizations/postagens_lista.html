@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Postagens{% endblock %}
+{% block conteudo %}
+<h1>Postagens das ONGs</h1>
+<form class="busca" method="get" novalidate>
+  {% for campo in form %}
+    <div><label for="{{ campo.id_for_label }}">{{ campo.label }}</label>{{ campo }}
+      {% for erro in campo.errors %}<div class="erro" role="alert">{{ erro }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+  <p><button type="submit">Buscar</button> <a href="{% url 'postagem-lista' %}">Limpar filtros</a></p>
+</form>
+<div class="cartoes">
+  {% for postagem in pagina %}
+    <article class="cartao">
+      <h2><a href="{% url 'postagem-detalhe' postagem.pk %}">{{ postagem.titulo }}</a></h2>
+      <p>{{ postagem.ong.nome }}</p><p>{{ postagem.conteudo|truncatechars:180 }}</p>
+    </article>
+  {% empty %}<p>Nenhum resultado para estes filtros. <a href="{% url 'postagem-lista' %}">Limpar filtros</a></p>{% endfor %}
+</div>
+{% if pagina.has_other_pages %}
+  <nav class="paginacao" aria-label="Paginação">
+    {% if pagina.has_previous %}<a href="?{{ filtros }}&amp;page={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+    <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+    {% if pagina.has_next %}<a href="?{{ filtros }}&amp;page={{ pagina.next_page_number }}">Próxima</a>{% endif %}
+  </nav>
+{% endif %}
+{% endblock %}

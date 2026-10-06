@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Minhas postagens{% endblock %}
+{% block conteudo %}
+<h1>Minhas postagens</h1>
+<p>{{ ong.nome }} · <a href="{% url 'painel' %}">Voltar ao painel</a></p>
+{% if ong.status != "aprovada" %}<p>A ONG precisa de aprovação para criar ou publicar postagens.</p>{% endif %}
+<p><a class="botao" href="{% url 'postagem-nova' %}">Nova postagem</a></p>
+<div class="cartoes">
+  {% for postagem in postagens %}
+    <article class="cartao">
+      <h2>{{ postagem.titulo }}</h2>
+      <span class="badge">{% if postagem.publicada %}Publicada{% else %}Rascunho{% endif %}</span>
+      <p><a href="{% url 'postagem-editar' postagem.pk %}">Editar postagem</a></p>
+      <form method="post" action="{% url 'postagem-excluir' postagem.pk %}">{% csrf_token %}<button type="submit" class="secundario">Excluir postagem</button></form>
+    </article>
+  {% empty %}<p>Nenhuma postagem cadastrada.</p>{% endfor %}
+</div>
+{% endblock %}

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator, RegexValidator, URLValidator
 from django.db import models
 
@@ -73,3 +74,34 @@ class Ong(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class Postagem(models.Model):
+    ong = models.ForeignKey(Ong, on_delete=models.PROTECT, related_name="postagens")
+    campanha = models.ForeignKey(
+        "campaigns.Campanha", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="postagens",
+    )
+    titulo = models.CharField("título", max_length=150)
+    conteudo = models.TextField("conteúdo", validators=[MaxLengthValidator(5000)])
+    publicada = models.BooleanField("publicada", default=False)
+    criada_em = models.DateTimeField(auto_now_add=True)
+    atualizada_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["ong", "publicada"], name="postagem_ong_publicada_idx")]
+
+    def clean(self):
+        erros = {}
+        if self.campanha_id:
+            if self.campanha.ong_id != self.ong_id:
+                erros["campanha"] = "A campanha deve pertencer à mesma ONG da postagem."
+            elif self.publicada and self.campanha.status == "rascunho":
+                erros["campanha"] = "Não é possível publicar com uma campanha em rascunho."
+        if self.publicada and self.ong_id and self.ong.status != Ong.Status.APROVADA:
+            erros["publicada"] = "A ONG precisa de aprovação para publicar postagens."
+        if erros:
+            raise ValidationError(erros)
+
+    def __str__(self):
+        return self.titulo

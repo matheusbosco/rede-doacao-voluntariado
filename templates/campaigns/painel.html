@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Minhas campanhas{% endblock %}
+{% block conteudo %}
+<h1>Minhas campanhas</h1>
+<p>{{ ong.nome }} · <a href="{% url 'painel' %}">Voltar ao painel</a></p>
+{% if ong.status != "aprovada" %}<p>A ONG precisa de aprovação para criar, publicar ou reativar campanhas.</p>{% endif %}
+<p><a class="botao" href="{% url 'campanha-nova' %}">Nova campanha</a></p>
+<form class="busca" method="get" novalidate>
+  {% for campo in form %}
+    <div><label for="{{ campo.id_for_label }}">{{ campo.label }}</label>{{ campo }}
+      {% for erro in campo.errors %}<div class="erro" role="alert">{{ erro }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+  <p><button type="submit">Filtrar</button> <a href="{% url 'campanha-painel' %}">Limpar filtros</a></p>
+</form>
+<div class="cartoes">
+  {% for campanha in campanhas %}
+    <article class="cartao">
+      <h2><a href="{% url 'campanha-detalhe' campanha.pk %}">{{ campanha.titulo }}</a></h2>
+      <span class="badge">{{ campanha.get_status_display }}</span>
+      <p><a href="{% url 'campanha-editar' campanha.pk %}">Editar campanha</a></p>
+      {% if campanha.status != "encerrada" %}
+      <form method="post" action="{% url 'campanha-estado' campanha.pk %}" class="acoes-campanha">
+        {% csrf_token %}
+        {% if campanha.status == "rascunho" %}<button name="acao" value="publicar" type="submit">Publicar</button>{% endif %}
+        {% if campanha.status == "ativa" %}<button name="acao" value="pausar" type="submit">Pausar</button>{% endif %}
+        {% if campanha.status == "pausada" %}<button name="acao" value="reativar" type="submit">Reativar</button>{% endif %}
+        {% if campanha.status == "ativa" or campanha.status == "pausada" %}<button name="acao" value="encerrar" type="submit">Encerrar</button>{% endif %}
+      </form>
+      {% endif %}
+      <form method="post" action="{% url 'campanha-excluir' campanha.pk %}">{% csrf_token %}<p><button type="submit" class="secundario">Excluir campanha</button></p></form>
+    </article>
+  {% empty %}<p>Nenhum resultado para estes filtros. <a href="{% url 'campanha-painel' %}">Limpar filtros</a></p>{% endfor %}
+</div>
+{% endblock %}
