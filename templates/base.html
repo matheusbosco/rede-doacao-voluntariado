@@ -1,0 +1,37 @@
+{% load static %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}DAI{% endblock %} · DAI</title>
+  <link rel="stylesheet" href="{% static 'css/dai.css' %}">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav aria-label="Principal">
+        <a class="marca" href="{% url 'painel' %}">DAI</a>
+        <div class="acoes">
+          {% if user.is_authenticated %}
+            <span class="ajuda">{{ user.first_name }}</span>
+            <form class="inline" method="post" action="{% url 'logout' %}">
+              {% csrf_token %}<button type="submit" class="secundario">Sair</button>
+            </form>
+          {% else %}
+            <a href="{% url 'login' %}">Entrar</a>
+            <a class="botao" href="{% url 'cadastro' %}">Criar conta</a>
+          {% endif %}
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    {% if messages %}
+      <ul class="mensagens" role="status" aria-live="polite">
+        {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    {% block conteudo %}{% endblock %}
+  </main>
+</body>
+</html>

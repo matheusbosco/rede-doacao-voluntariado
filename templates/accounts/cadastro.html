@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titulo %}Criar conta{% endblock %}
+{% block conteudo %}
+<h1>Criar conta</h1>
+<form class="cartao" method="post" novalidate>
+  {% csrf_token %}
+  {% for campo in form %}
+    <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    {{ campo }}
+    {% if campo.help_text %}<div class="ajuda">{{ campo.help_text|safe }}</div>{% endif %}
+    {% for erro in campo.errors %}<div class="erro" role="alert">{{ erro }}</div>{% endfor %}
+  {% endfor %}
+  <p><button type="submit">Criar conta</button></p>
+  <p class="ajuda">Já tem conta? <a href="{% url 'login' %}">Entrar</a></p>
+</form>
+{% endblock %}

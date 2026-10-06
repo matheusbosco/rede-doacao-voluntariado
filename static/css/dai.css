@@ -1,0 +1,32 @@
+:root {
+  --azul: #1d4ed8;
+  --azul-profundo: #12315a;
+  --azul-claro: #eff6ff;
+  --texto: #223047;
+  --texto-suave: #52647a;
+  --borda: #cbd5e1;
+  --erro: #b91c1c;
+  --sucesso: #166534;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; color: var(--texto); background: #fff; line-height: 1.5; }
+h1, h2 { font-family: Georgia, serif; color: var(--azul-profundo); }
+header { border-bottom: 1px solid var(--borda); }
+.container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+nav a.marca { font-family: Georgia, serif; font-weight: 700; font-size: 1.5rem; color: var(--azul-profundo); text-decoration: none; }
+nav .acoes { display: flex; gap: 16px; align-items: center; }
+a { color: var(--azul); }
+main { padding: 32px 0 64px; }
+.cartao { max-width: 480px; border: 1px solid var(--borda); border-radius: 12px; padding: 24px; background: #fff; }
+label { display: block; font-weight: 600; margin-top: 16px; }
+input { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--borda); border-radius: 8px; font: inherit; }
+input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+button, .botao { display: inline-block; min-height: 44px; padding: 8px 20px; border: 0; border-radius: 8px; background: var(--azul); color: #fff; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none; }
+button.secundario { background: #fff; color: var(--azul); border: 1px solid var(--azul); }
+.ajuda { color: var(--texto-suave); font-size: .875rem; }
+.erro { color: var(--erro); font-size: .875rem; }
+.mensagens { list-style: none; padding: 0; margin: 0 0 16px; }
+.mensagens li { padding: 12px 16px; border-radius: 8px; background: var(--azul-claro); border: 1px solid var(--borda); }
+.mensagens li.success { color: var(--sucesso); }
+form.inline { display: inline; }
