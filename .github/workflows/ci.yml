@@ -1,0 +1,78 @@
+name: Integração contínua
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: dai_ci
+      POSTGRES_PASSWORD: descartavel_ci
+      POSTGRES_DB: dai_ci
+      DATABASE_URL: postgres://dai_ci:descartavel_ci@localhost:5432/dai_ci
+      DEBUG: "true"
+      SECRET_KEY: ficticia-exclusiva-dos-testes-ci
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U dai_ci -d dai_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+      - name: Verificar configuração e migrações
+        run: |
+          python manage.py check
+          python manage.py makemigrations --check --dry-run
+      - name: Executar testes
+        run: python manage.py test
+      - name: Validar contrato da API
+        run: python manage.py spectacular --validate --fail-on-warn --file "$RUNNER_TEMP/schema.yml"
+      - name: Gerar relatório completo do Bandit
+        run: >-
+          python -m bandit -r accounts config integrations organizations campaigns contributions reports api
+          -x tests,tests.py,tests_postagens.py,tests_seed_demo.py,tests_quantidades.py,.venv
+          -f json -o "$RUNNER_TEMP/bandit.json" --exit-zero
+      - name: Publicar relatório do Bandit
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-completo
+          path: ${{ runner.temp }}/bandit.json
+      - name: Rejeitar achados médios ou altos
+        run: >-
+          python -m bandit -ll -q -r accounts config integrations organizations campaigns contributions reports api
+          -x tests,tests.py,tests_postagens.py,tests_seed_demo.py,tests_quantidades.py,.venv
+      - name: Exibir avisos de produção
+        env:
+          DEBUG: "false"
+          ALLOWED_HOSTS: exemplo.local
+          SECURE_HSTS_SECONDS: "3600"
+        run: |
+          export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(64))')"
+          python manage.py check --deploy 2>&1 | tee "$RUNNER_TEMP/deploy.txt" || true
+          {
+            echo '### Avisos restantes de produção'
+            echo '```text'
+            cat "$RUNNER_TEMP/deploy.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
