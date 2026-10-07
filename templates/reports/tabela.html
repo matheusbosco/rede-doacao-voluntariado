@@ -1,6 +1,9 @@
+{% load quantidades %}
+<div class="tabela-rolagem" role="region" aria-label="Resultados por campanha" tabindex="0">
 <table>
-  <thead><tr><th>Campanha</th><th>Tipo</th><th>Unidade</th><th>Meta</th><th>Total confirmado</th><th>Declaradas</th><th>Aceitas</th><th>Confirmadas</th><th>Recusadas</th><th>Canceladas</th></tr></thead>
+  <thead><tr><th scope="col">Campanha</th><th scope="col">Tipo</th><th scope="col">Unidade</th><th scope="col" class="numero">Meta</th><th scope="col" class="numero">Total confirmado</th><th scope="col" class="numero">Declaradas</th><th scope="col" class="numero">Aceitas</th><th scope="col" class="numero">Confirmadas</th><th scope="col" class="numero">Recusadas</th><th scope="col" class="numero">Canceladas</th></tr></thead>
   <tbody>{% for linha in linhas %}
-    <tr><td>{{ linha.titulo }}</td><td>{{ linha.tipo }}</td><td>{{ linha.unidade }}</td><td>{{ linha.meta|floatformat:2 }}</td><td>{{ linha.total_confirmado|floatformat:2 }}</td><td>{{ linha.declaradas }}</td><td>{{ linha.aceitas }}</td><td>{{ linha.confirmadas }}</td><td>{{ linha.recusadas }}</td><td>{{ linha.canceladas }}</td></tr>
+    <tr><td>{{ linha.titulo }}</td><td>{{ linha.tipo }}</td><td>{{ linha.unidade }}</td><td class="numero">{{ linha.meta|medida:linha }}</td><td class="numero">{{ linha.total_confirmado|medida:linha }}</td><td class="numero">{{ linha.declaradas }}</td><td class="numero">{{ linha.aceitas }}</td><td class="numero">{{ linha.confirmadas }}</td><td class="numero">{{ linha.recusadas }}</td><td class="numero">{{ linha.canceladas }}</td></tr>
   {% empty %}<tr><td colspan="10">Nenhuma campanha para estes filtros.</td></tr>{% endfor %}</tbody>
 </table>
+</div>

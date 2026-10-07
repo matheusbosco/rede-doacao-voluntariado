@@ -11,7 +11,7 @@
       <h2>{{ postagem.titulo }}</h2>
       <span class="badge">{% if postagem.publicada %}Publicada{% else %}Rascunho{% endif %}</span>
       <p><a href="{% url 'postagem-editar' postagem.pk %}">Editar postagem</a></p>
-      <form method="post" action="{% url 'postagem-excluir' postagem.pk %}">{% csrf_token %}<button type="submit" class="secundario">Excluir postagem</button></form>
+      <form method="post" action="{% url 'postagem-excluir' postagem.pk %}">{% csrf_token %}<button type="submit" class="negativo">Excluir postagem</button></form>
     </article>
   {% empty %}<p>Nenhuma postagem cadastrada.</p>{% endfor %}
 </div>

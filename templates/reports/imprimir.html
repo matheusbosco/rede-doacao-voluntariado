@@ -1,11 +1,10 @@
-<!doctype html>
+{% load static %}<!doctype html>
 <html lang="pt-br">
-<head><meta charset="utf-8"><title>Relatório de campanhas</title>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Relatório de campanhas</title>
+<link rel="stylesheet" href="{% static 'css/dai.css' %}">
 <style>
-body { font-family: sans-serif; }
-table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid #999; padding: 0.3em; text-align: left; }
-@media print { @page { size: landscape; margin: 1cm; } thead { display: table-header-group; } tr { break-inside: avoid; } }
+body { padding: 20px; overflow-wrap: anywhere; }
+@media print { @page { size: landscape; margin: 1cm; } thead { display: table-header-group; } tr { break-inside: avoid; } .tabela-rolagem { overflow: visible; } th, td { padding: 0.3em; } }
 </style></head>
 <body>
 <h1>Relatório de campanhas · {{ ong.nome }}</h1>

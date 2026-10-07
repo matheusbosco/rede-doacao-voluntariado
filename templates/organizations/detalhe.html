@@ -41,6 +41,6 @@
   {% if ong.status == "recusada" %}
     <form method="post" action="{% url 'ong-reenviar' ong.pk %}">{% csrf_token %}<p><button type="submit">Reenviar para análise</button></p></form>
   {% endif %}
-  <form method="post" action="{% url 'ong-excluir' ong.pk %}">{% csrf_token %}<button class="secundario" type="submit">Excluir ONG</button></form>
+  <form method="post" action="{% url 'ong-excluir' ong.pk %}">{% csrf_token %}<button class="negativo" type="submit">Excluir ONG</button></form>
 {% endif %}
 {% endblock %}

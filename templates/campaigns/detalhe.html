@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load quantidades %}
 {% block nome_usuario %}{% endblock %}
 {% block titulo %}{{ campanha.titulo }}{% endblock %}
 {% block conteudo %}
@@ -9,8 +10,8 @@
 {{ campanha.descricao|linebreaks }}
 <p>Tipo: {{ campanha.get_tipo_display }}</p>
 <p>Unidade: {{ campanha.unidade }}</p>
-<p>Meta: {{ campanha.meta }}</p>
-<p>Total confirmado: {{ campanha.total_confirmado|floatformat:2 }} {{ campanha.unidade }} · {{ campanha.percentual_meta|floatformat:2 }}% da meta</p>
+<p>Meta: {{ campanha.meta|medida:campanha }}</p>
+<p>Total confirmado: {{ campanha.total_confirmado|medida:campanha }} · {{ campanha.percentual_meta|floatformat:2 }}% da meta</p>
 {% if campanha.disponivel and not dono %}<p><a class="botao" href="{% url 'contribuicao-criar' campanha.pk %}">Contribuir</a></p>{% endif %}
 <p>Início: {{ campanha.data_inicio }} · Fim: {{ campanha.data_fim }}</p>
 <p>{% if campanha.disponivel %}Disponível hoje{% else %}Indisponível: {{ campanha.motivo_indisponibilidade }}{% endif %}</p>

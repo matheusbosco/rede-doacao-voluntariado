@@ -12,7 +12,7 @@
         <label for="motivo-{{ ong.pk }}">Motivo (obrigatório para recusar)</label>
         <textarea id="motivo-{{ ong.pk }}" name="motivo" maxlength="500" rows="3"></textarea>
         <p><button type="submit" name="decisao" value="aprovar">Aprovar</button>
-        <button class="secundario" type="submit" name="decisao" value="recusar">Recusar</button></p>
+        <button class="negativo" type="submit" name="decisao" value="recusar">Recusar</button></p>
       </form>
     </article>
   {% empty %}<p>Nenhuma ONG pendente de análise.</p>{% endfor %}

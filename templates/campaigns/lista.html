@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load quantidades %}
 {% block nome_usuario %}{% endblock %}
 {% block titulo %}Campanhas{% endblock %}
 {% block conteudo %}
@@ -18,8 +19,8 @@
       <span class="badge">{{ campanha.get_status_display }}</span>
       <p>{{ campanha.ong.nome }} · {{ campanha.ong.cidade }}/{{ campanha.ong.uf }}</p>
       <p>{{ campanha.descricao|truncatechars:180 }}</p>
-      <p>{{ campanha.get_tipo_display }} · Meta: {{ campanha.meta }} {{ campanha.unidade }}</p>
-      <p>Total confirmado: {{ campanha.total_confirmado|floatformat:2 }} {{ campanha.unidade }} · {{ campanha.percentual_meta|floatformat:2 }}% da meta</p>
+      <p>{{ campanha.get_tipo_display }} · Meta: {{ campanha.meta|medida:campanha }}</p>
+      <p>Total confirmado: {{ campanha.total_confirmado|medida:campanha }} · {{ campanha.percentual_meta|floatformat:2 }}% da meta</p>
       <p>Até {{ campanha.data_fim }} · {% if campanha.disponivel %}Disponível{% else %}{{ campanha.motivo_indisponibilidade }}{% endif %}</p>
     </article>
   {% empty %}

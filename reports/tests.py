@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from accounts.models import User
 from campaigns.models import Campanha
+from campaigns.templatetags.quantidades import medida
 from campaigns.tests import dados_campanha
 from contributions.models import Contribuicao
 from contributions.services import avaliar_contribuicao, cancelar_contribuicao, criar_contribuicao
@@ -198,7 +199,8 @@ class RelatorioTests(TestCase):
         for exibida, exportada in zip(tabelas[0], csv_linhas, strict=True):
             self.assertEqual(exibida[:3], [exportada[campo] for campo in ("titulo", "tipo", "unidade")])
             for indice, campo in ((3, "meta"), (4, "total_confirmado")):
-                self.assertEqual(Decimal(exibida[indice].replace(".", "").replace(",", ".")), Decimal(exportada[campo].replace(",", ".")))
+                numero_csv = Decimal(exportada[campo].replace(",", "."))
+                self.assertEqual(exibida[indice], medida(numero_csv, exportada))
             self.assertEqual(exibida[5:], [exportada[campo] for campo in ("declaradas", "aceitas", "confirmadas", "recusadas", "canceladas")])
 
     def test_tres_saidas_chamam_a_mesma_consulta(self):

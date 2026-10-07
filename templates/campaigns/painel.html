@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load quantidades %}
 {% block titulo %}Minhas campanhas{% endblock %}
 {% block conteudo %}
 <h1>Minhas campanhas</h1>
@@ -18,18 +19,18 @@
     <article class="cartao">
       <h2><a href="{% url 'campanha-detalhe' campanha.pk %}">{{ campanha.titulo }}</a></h2>
       <span class="badge">{{ campanha.get_status_display }}</span>
-      <p>Total confirmado: {{ campanha.total_confirmado|floatformat:2 }} {{ campanha.unidade }} · Meta: {{ campanha.meta }} · {{ campanha.percentual_meta|floatformat:2 }}%</p>
+      <p>Total confirmado: {{ campanha.total_confirmado|medida:campanha }} · Meta: {{ campanha.meta|medida:campanha }} · {{ campanha.percentual_meta|floatformat:2 }}%</p>
       <p><a href="{% url 'campanha-editar' campanha.pk %}">Editar campanha</a></p>
       {% if campanha.status != "encerrada" %}
       <form method="post" action="{% url 'campanha-estado' campanha.pk %}" class="acoes-campanha">
         {% csrf_token %}
         {% if campanha.status == "rascunho" %}<button name="acao" value="publicar" type="submit">Publicar</button>{% endif %}
-        {% if campanha.status == "ativa" %}<button name="acao" value="pausar" type="submit">Pausar</button>{% endif %}
+        {% if campanha.status == "ativa" %}<button name="acao" value="pausar" type="submit" class="negativo">Pausar</button>{% endif %}
         {% if campanha.status == "pausada" %}<button name="acao" value="reativar" type="submit">Reativar</button>{% endif %}
-        {% if campanha.status == "ativa" or campanha.status == "pausada" %}<button name="acao" value="encerrar" type="submit">Encerrar</button>{% endif %}
+        {% if campanha.status == "ativa" or campanha.status == "pausada" %}<button name="acao" value="encerrar" type="submit" class="negativo">Encerrar</button>{% endif %}
       </form>
       {% endif %}
-      <form method="post" action="{% url 'campanha-excluir' campanha.pk %}">{% csrf_token %}<p><button type="submit" class="secundario">Excluir campanha</button></p></form>
+      <form method="post" action="{% url 'campanha-excluir' campanha.pk %}">{% csrf_token %}<p><button type="submit" class="negativo">Excluir campanha</button></p></form>
     </article>
   {% empty %}<p>Nenhum resultado para estes filtros. <a href="{% url 'campanha-painel' %}">Limpar filtros</a></p>{% endfor %}
 </div>
