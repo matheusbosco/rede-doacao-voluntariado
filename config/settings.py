@@ -24,6 +24,13 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = env_lista("ALLOWED_HOSTS") or (["localhost", "127.0.0.1"] if DEBUG else [])
 CSRF_TRUSTED_ORIGINS = env_lista("CSRF_TRUSTED_ORIGINS")
+hostname_render = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if hostname_render:
+    if hostname_render not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(hostname_render)
+    origem_render = f"https://{hostname_render}"
+    if origem_render not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origem_render)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -104,6 +111,11 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+X_FRAME_OPTIONS = "DENY"
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["api.permissions.SessaoAuthentication"],
     "DEFAULT_PERMISSION_CLASSES": ["api.permissions.Autenticado"],
@@ -137,7 +149,25 @@ SPECTACULAR_SETTINGS = {
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", True)
+    # O health check interno pode usar HTTP; somente /health/ fica isento.
+    SECURE_REDIRECT_EXEMPT = [r"^health/$"]
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "0"))
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {"seguro": {"()": "config.logging.FormatoSeguro"}},
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler", "stream": "ext://sys.stdout",
+                "level": "WARNING", "formatter": "seguro",
+            },
+        },
+        "root": {"handlers": ["console"], "level": "WARNING"},
+        "loggers": {
+            "django": {"handlers": [], "level": "WARNING", "propagate": True},
+            "django.server": {"handlers": [], "level": "WARNING", "propagate": True},
+        },
+    }
