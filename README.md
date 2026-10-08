@@ -1,6 +1,6 @@
 # DAI — rede de doação e voluntariado local
 
-Aplicação web em Django que reúne ONGs e suas campanhas e registra contribuições em dinheiro, itens e horas de voluntariado. **A plataforma não processa pagamentos**: transferências, entregas e atividades acontecem fora do sistema, e só contribuições confirmadas pela ONG entram nos totais.
+Aplicação web em Django que reúne ONGs e suas campanhas e registra contribuições em dinheiro, itens e horas de voluntariado. **A plataforma não processa pagamentos**: transferências, entregas e atividades acontecem fora do sistema, e só contribuições confirmadas pela ONG entram nos totais. Decisão tomada por uma questão da complexidade que representa a integração do sistema com gateways de pagamento.
 
 **Instituição:** UniCEUB · **Curso:** Ciência da Computação · **Disciplina:** Desenvolvimento Web (turma B, matutino)
 **Professor:** Felippe Pires Ferreira · **Integrante:** Matheus Benjamim de Souza Bosco ([@matheusbosco] **Matrícula:** 22612082. (https://github.com/matheusbosco)), trabalho individual
@@ -74,7 +74,7 @@ O CI (`.github/workflows/ci.yml`) roda essas verificações a cada push. A rodad
 
 ## Uso de inteligência artificial
 
-As decisões de projeto (tema, escopo, regras de negócio e fluxos) são do autor, que também revisou todo o material antes da entrega. Ferramentas de IA generativa (ChatGPT/Codex e Claude) foram usadas na redação e na revisão dos documentos da Fase 1 em `docs/`, na geração de diagramas, imagens e PDFs e na conferência técnica contra o código.
+As decisões de projeto (tema, escopo, regras de negócio e fluxos)  e a redação são minhas, também revisei todo o material antes da entrega. Ferramentas de IA generativa (ChatGPT/Codex e Claude) foram usadas na revisão dos documentos da Fase 1 em `docs/`, na geração de diagramas, imagens e PDFs e na conferência técnica contra o código.
 
 O código, os testes, o CI e a configuração de deploy foram escritos com assistência de IA (Claude Code coordenando o Codex), sob direção do autor. As capturas de tela, o esquema OpenAPI e este README técnico foram gerados por ferramenta a partir do sistema.
 
