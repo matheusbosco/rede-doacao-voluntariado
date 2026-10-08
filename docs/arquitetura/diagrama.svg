@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2250" height="1350" viewBox="0 0 2250 1350">
+<title>DAI - Diagrama UML de implantação e componentes</title>
+<desc>DAI - Diagrama UML de implantação e componentes</desc>
+<rect x="0" y="0" width="2250" height="1350" rx="0" fill="#FFFFFF" stroke="none" stroke-width="1"/>
+<text x="65" y="69" font-family="DejaVu Sans" font-size="18" font-weight="bold" text-anchor="start" fill="#1D4ED8">DAI / ARQUITETURA</text>
+<text x="65" y="130" font-family="DejaVu Serif" font-size="46" font-weight="normal" text-anchor="start" fill="#12315A">Componentes do DAI</text>
+<text x="2185" y="82" font-family="DejaVu Sans" font-size="18" font-weight="bold" text-anchor="end" fill="#12315A">AMBIENTE PREVISTO</text>
+<text x="2185" y="119" font-family="DejaVu Sans" font-size="17" font-weight="normal" text-anchor="end" fill="#52647A">Render e Neon: publicação pendente</text>
+<rect x="70" y="480" width="370" height="280" rx="0" fill="#FFFFFF" stroke="#12315A" stroke-width="2"/>
+<polyline points="70,480 88,462 458,462 440,480" stroke="#12315A" stroke-width="1.5" fill="none"/>
+<polyline points="440,480 458,462 458,742 440,760" stroke="#12315A" stroke-width="1.5" fill="none"/>
+<text x="255.0" y="513" font-family="DejaVu Sans" font-size="16" font-weight="normal" text-anchor="middle" fill="#1D4ED8">«device»</text>
+<text x="255.0" y="549" font-family="DejaVu Sans" font-size="26" font-weight="bold" text-anchor="middle" fill="#12315A">Navegador</text>
+<text x="94" y="592" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Páginas HTML e formulários</text>
+<text x="94" y="620" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">CSS e JavaScript</text>
+<text x="94" y="648" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Cookies de sessão e CSRF</text>
+<text x="94" y="676" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Cliente da API na mesma origem</text>
+<rect x="800" y="260" width="750" height="730" rx="0" fill="#FFFFFF" stroke="#12315A" stroke-width="2"/>
+<polyline points="800,260 818,242 1568,242 1550,260" stroke="#12315A" stroke-width="1.5" fill="none"/>
+<polyline points="1550,260 1568,242 1568,972 1550,990" stroke="#12315A" stroke-width="1.5" fill="none"/>
+<text x="1175.0" y="293" font-family="DejaVu Sans" font-size="16" font-weight="normal" text-anchor="middle" fill="#1D4ED8">«executionEnvironment»</text>
+<text x="1175.0" y="329" font-family="DejaVu Sans" font-size="26" font-weight="bold" text-anchor="middle" fill="#12315A">Render / serviço web</text>
+<text x="830" y="363" font-family="DejaVu Sans" font-size="21" font-weight="bold" text-anchor="start" fill="#12315A">Gunicorn → aplicação WSGI</text>
+<rect x="840" y="404" width="670" height="536" rx="0" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="1.8"/>
+<text x="865" y="440" font-family="DejaVu Sans" font-size="25" font-weight="bold" text-anchor="start" fill="#12315A">«component» Django</text>
+<rect x="865" y="467" width="285" height="170" rx="0" fill="#EFF6FF" stroke="#CBD5E1" stroke-width="1"/>
+<text x="887" y="505" font-family="DejaVu Sans" font-size="22" font-weight="bold" text-anchor="start" fill="#12315A">Páginas</text>
+<text x="887" y="545" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Views e templates</text>
+<text x="887" y="572" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Forms e validação</text>
+<text x="887" y="599" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Resposta HTML</text>
+<rect x="1175" y="467" width="310" height="170" rx="0" fill="#EFF6FF" stroke="#CBD5E1" stroke-width="1"/>
+<text x="1197" y="505" font-family="DejaVu Sans" font-size="22" font-weight="bold" text-anchor="start" fill="#12315A">API REST / DRF</text>
+<text x="1197" y="545" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">/api/v1/</text>
+<text x="1197" y="572" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Serializers e permissões</text>
+<text x="1197" y="599" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Resposta JSON / CSV</text>
+<rect x="865" y="674" width="620" height="102" rx="0" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+<text x="886" y="710" font-family="DejaVu Sans" font-size="23" font-weight="bold" text-anchor="start" fill="#12315A">Serviços de domínio</text>
+<text x="886" y="750" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Regras, estados e transações compartilhadas</text>
+<rect x="865" y="816" width="620" height="97" rx="0" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+<text x="886" y="852" font-family="DejaVu Sans" font-size="23" font-weight="bold" text-anchor="start" fill="#12315A">ORM e cliente ViaCEP</text>
+<text x="886" y="889" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Persistência e integração com timeout e cache</text>
+<rect x="1810" y="270" width="350" height="260" rx="0" fill="#FFFFFF" stroke="#12315A" stroke-width="2"/>
+<polyline points="1810,270 1828,252 2178,252 2160,270" stroke="#12315A" stroke-width="1.5" fill="none"/>
+<polyline points="2160,270 2178,252 2178,512 2160,530" stroke="#12315A" stroke-width="1.5" fill="none"/>
+<text x="1985.0" y="303" font-family="DejaVu Sans" font-size="16" font-weight="normal" text-anchor="middle" fill="#1D4ED8">«executionEnvironment»</text>
+<text x="1985.0" y="339" font-family="DejaVu Sans" font-size="26" font-weight="bold" text-anchor="middle" fill="#12315A">Neon</text>
+<text x="1834" y="382" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">«database» PostgreSQL</text>
+<text x="1834" y="410" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Dados do domínio</text>
+<text x="1834" y="438" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Cache de CEP persistido</text>
+<text x="1834" y="466" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Sessões da aplicação</text>
+<rect x="1810" y="770" width="350" height="230" rx="0" fill="#FFFFFF" stroke="#12315A" stroke-width="2"/>
+<polyline points="1810,770 1828,752 2178,752 2160,770" stroke="#12315A" stroke-width="1.5" fill="none"/>
+<polyline points="2160,770 2178,752 2178,982 2160,1000" stroke="#12315A" stroke-width="1.5" fill="none"/>
+<text x="1985.0" y="803" font-family="DejaVu Sans" font-size="16" font-weight="normal" text-anchor="middle" fill="#1D4ED8">«externalService»</text>
+<text x="1985.0" y="839" font-family="DejaVu Sans" font-size="26" font-weight="bold" text-anchor="middle" fill="#12315A">ViaCEP</text>
+<text x="1834" y="882" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Endereço por CEP</text>
+<text x="1834" y="910" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">HTTPS / JSON</text>
+<text x="1834" y="938" font-family="DejaVu Sans" font-size="19" font-weight="normal" text-anchor="start" fill="#52647A">Sem chave de API</text>
+<polyline points="440,595 800,595" stroke="#52647A" stroke-width="2" fill="none"/>
+<polyline points="789.0,589.28 800,595 789.0,600.72" stroke="#52647A" stroke-width="2" fill="none"/>
+<text x="620" y="537" font-family="DejaVu Sans" font-size="20" font-weight="bold" text-anchor="middle" fill="#12315A">HTTPS</text>
+<text x="620" y="572" font-family="DejaVu Sans" font-size="17" font-weight="normal" text-anchor="middle" fill="#52647A">Páginas, API e formulários</text>
+<text x="620" y="635" font-family="DejaVu Sans" font-size="16" font-weight="normal" text-anchor="middle" fill="#52647A">Resposta: HTML / JSON / CSV</text>
+<polyline points="1510,432 1810,432" stroke="#52647A" stroke-width="2" fill="none"/>
+<polyline points="1799.0,426.28 1810,432 1799.0,437.72" stroke="#52647A" stroke-width="2" fill="none"/>
+<text x="1680" y="385" font-family="DejaVu Sans" font-size="20" font-weight="bold" text-anchor="middle" fill="#12315A">SQL / TLS</text>
+<text x="1680" y="413" font-family="DejaVu Sans" font-size="17" font-weight="normal" text-anchor="middle" fill="#52647A">ORM → dados</text>
+<polyline points="1510,886 1810,886" stroke="#52647A" stroke-width="2" fill="none"/>
+<polyline points="1799.0,880.28 1810,886 1799.0,891.72" stroke="#52647A" stroke-width="2" fill="none"/>
+<text x="1680" y="838" font-family="DejaVu Sans" font-size="20" font-weight="bold" text-anchor="middle" fill="#12315A">HTTPS / JSON</text>
+<text x="1680" y="866" font-family="DejaVu Sans" font-size="17" font-weight="normal" text-anchor="middle" fill="#52647A">Consultar CEP</text>
+<polyline points="1008,637 1008,674" stroke="#52647A" stroke-width="1.5" fill="none"/>
+<polyline points="1013.72,663.0 1008,674 1002.28,663.0" stroke="#52647A" stroke-width="1.5" fill="none"/>
+<polyline points="1330,637 1330,674" stroke="#52647A" stroke-width="1.5" fill="none"/>
+<polyline points="1335.72,663.0 1330,674 1324.28,663.0" stroke="#52647A" stroke-width="1.5" fill="none"/>
+<polyline points="1170,776 1170,816" stroke="#52647A" stroke-width="1.5" fill="none"/>
+<polyline points="1175.72,805.0 1170,816 1164.28,805.0" stroke="#52647A" stroke-width="1.5" fill="none"/>
+<rect x="70" y="1050" width="2090" height="175" rx="0" fill="#F5F8FE" stroke="#CBD5E1" stroke-width="1"/>
+<text x="94" y="1090" font-family="DejaVu Sans" font-size="16" font-weight="bold" text-anchor="start" fill="#1D4ED8">DA CONTRIBUIÇÃO AO RESULTADO</text>
+<text x="94" y="1130" font-family="DejaVu Sans" font-size="21" font-weight="normal" text-anchor="start" fill="#223047">Usuário envia a ajuda → servidor confere os dados → banco guarda o registro como declarada.</text>
+<text x="94" y="1161" font-family="DejaVu Sans" font-size="21" font-weight="normal" text-anchor="start" fill="#223047">Responsável verifica o recebimento. Apenas confirmadas entram no total; transferências são externas.</text>
+<text x="94" y="1192" font-family="DejaVu Sans" font-size="21" font-weight="normal" text-anchor="start" fill="#223047">Endereço pode ser preenchido sem a consulta de CEP.</text>
+<text x="70" y="1287" font-family="DejaVu Sans" font-size="17" font-weight="normal" text-anchor="start" fill="#52647A">Caixas com estereótipos: nós, ambientes e componentes UML. Setas indicam quem inicia a comunicação.</text>
+<text x="2185" y="1320" font-family="DejaVu Sans" font-size="16" font-weight="normal" text-anchor="end" fill="#52647A">Django / Render / PostgreSQL no Neon / ViaCEP</text>
+</svg>
