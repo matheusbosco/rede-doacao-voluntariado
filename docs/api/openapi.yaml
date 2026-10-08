@@ -1,0 +1,5932 @@
+openapi: 3.0.3
+info:
+  title: DAI — API v1
+  version: 1.0.0
+  description: ONGs, campanhas e contribuições declaradas. Sessão Django e CSRF nas
+    mutações. Nenhum pagamento é processado.
+paths:
+  /api/v1/admin/ongs/:
+    get:
+      operationId: listar_ongs_para_analise_da_equipe
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Listar ONGs para análise da equipe
+      parameters:
+      - in: query
+        name: ordering
+        schema:
+          enum:
+          - criada_em
+          - nome
+          type: string
+          minLength: 1
+        description: |-
+          * `criada_em` - criada_em
+          * `nome` - nome
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: status
+        schema:
+          enum:
+          - pendente
+          - aprovada
+          - recusada
+          type: string
+          default: pendente
+          minLength: 1
+        description: |-
+          * `pendente` - Pendente
+          * `aprovada` - Aprovada
+          * `recusada` - Recusada
+      tags:
+      - Administração
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaOngPrivada'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - id: 1
+                      nome: Amigos
+                      descricao: Apoio social
+                      causa: Educação
+                      email_contato: contato@example.org
+                      telefone: ''
+                      site: ''
+                      endereco:
+                        cep: '01001000'
+                        logradouro: Praça da Sé
+                        numero: '10'
+                        complemento: ''
+                        bairro: Sé
+                        cidade: São Paulo
+                        uf: SP
+                      instrucoes_recebimento: Agende a entrega.
+                      cnpj: null
+                      status: pendente
+                      motivo_analise: ''
+                      criada_em: '2026-10-06T10:00:00-03:00'
+                      atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/admin/ongs/{id}/analise/:
+    post:
+      operationId: aprovar_ou_recusar_ong_pendente
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Aprovar ou recusar ONG pendente
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Administração
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnaliseEntrada'
+            examples:
+              Requisição:
+                value:
+                  decisao: recusar
+                  motivo: Confira o endereço.
+        required: true
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OngPrivada'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    nome: Amigos
+                    descricao: Apoio social
+                    causa: Educação
+                    email_contato: contato@example.org
+                    telefone: ''
+                    site: ''
+                    endereco:
+                      cep: '01001000'
+                      logradouro: Praça da Sé
+                      numero: '10'
+                      complemento: ''
+                      bairro: Sé
+                      cidade: São Paulo
+                      uf: SP
+                    instrucoes_recebimento: Agende a entrega.
+                    cnpj: null
+                    status: pendente
+                    motivo_analise: ''
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/auth/cadastro/:
+    post:
+      operationId: cadastrar_usuario_sem_iniciar_sessao
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Cadastrar usuário sem iniciar sessão
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      tags:
+      - Autenticação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroEntrada'
+            examples:
+              Requisição:
+                value:
+                  username: maria
+                  email: maria@example.org
+                  first_name: Maria
+                  password: Frase segura! 2026
+                  password_confirm: Frase segura! 2026
+        required: true
+      security:
+      - csrf: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioBasico'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    username: maria
+                    first_name: Maria
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/auth/csrf/:
+    get:
+      operationId: obter_cookie_e_token_csrf
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Obter cookie e token CSRF
+      tags:
+      - Autenticação
+      security:
+      - sessao: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CSRFResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    csrf_token: token emitido pelo servidor
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: entrar_com_sessao_django
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Entrar com sessão Django
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      tags:
+      - Autenticação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginEntrada'
+            examples:
+              Requisição:
+                value:
+                  username: maria
+                  password: Frase segura! 2026
+        required: true
+      security:
+      - csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioBasico'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    username: maria
+                    first_name: Maria
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/auth/logout/:
+    post:
+      operationId: encerrar_sessao
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Encerrar sessão
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      tags:
+      - Autenticação
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/auth/me/:
+    get:
+      operationId: consultar_meu_perfil
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar meu perfil
+      tags:
+      - Autenticação
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeuUsuario'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    username: maria
+                    first_name: Maria
+                    last_name: Silva
+                    email: maria@example.org
+                    ong_id: 1
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/campanhas/:
+    get:
+      operationId: listar_campanhas_publicas
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Listar campanhas públicas
+      parameters:
+      - in: query
+        name: bairro
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: cidade
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: disponivel
+        schema:
+          type: boolean
+      - in: query
+        name: ong_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: ordering
+        schema:
+          enum:
+          - -criada_em
+          - data_fim
+          - titulo
+          type: string
+          minLength: 1
+        description: |-
+          * `-criada_em` - -criada_em
+          * `data_fim` - data_fim
+          * `titulo` - titulo
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: q
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: status
+        schema:
+          enum:
+          - ativa
+          - pausada
+          - encerrada
+          type: string
+          minLength: 1
+        description: |-
+          * `ativa` - ativa
+          * `pausada` - pausada
+          * `encerrada` - encerrada
+      - in: query
+        name: tipo
+        schema:
+          enum:
+          - dinheiro
+          - item
+          - horas
+          type: string
+          minLength: 1
+        description: |-
+          * `dinheiro` - Dinheiro
+          * `item` - Item
+          * `horas` - Horas
+      - in: query
+        name: uf
+        schema:
+          enum:
+          - AC
+          - AL
+          - AP
+          - AM
+          - BA
+          - CE
+          - DF
+          - ES
+          - GO
+          - MA
+          - MT
+          - MS
+          - MG
+          - PA
+          - PB
+          - PR
+          - PE
+          - PI
+          - RJ
+          - RN
+          - RS
+          - RO
+          - RR
+          - SC
+          - SP
+          - SE
+          - TO
+          type: string
+          minLength: 1
+        description: |-
+          * `AC` - AC
+          * `AL` - AL
+          * `AP` - AP
+          * `AM` - AM
+          * `BA` - BA
+          * `CE` - CE
+          * `DF` - DF
+          * `ES` - ES
+          * `GO` - GO
+          * `MA` - MA
+          * `MT` - MT
+          * `MS` - MS
+          * `MG` - MG
+          * `PA` - PA
+          * `PB` - PB
+          * `PR` - PR
+          * `PE` - PE
+          * `PI` - PI
+          * `RJ` - RJ
+          * `RN` - RN
+          * `RS` - RS
+          * `RO` - RO
+          * `RR` - RR
+          * `SC` - SC
+          * `SP` - SP
+          * `SE` - SE
+          * `TO` - TO
+      tags:
+      - Campanhas
+      security:
+      - sessao: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaCampanhaResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - id: 1
+                      ong_id: 1
+                      titulo: Cestas
+                      descricao: Alimentos
+                      tipo: item
+                      unidade: cesta
+                      meta: '100.00'
+                      data_inicio: '2026-10-06'
+                      data_fim: '2026-10-16'
+                      status: ativa
+                      total_confirmado: '15.00'
+                      percentual_meta: '15.00'
+                      disponivel: true
+                      criada_em: '2026-10-06T10:00:00-03:00'
+                      atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    post:
+      operationId: criar_campanha_como_rascunho
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Criar campanha como rascunho
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      tags:
+      - Campanhas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampanhaEntrada'
+            examples:
+              Requisição:
+                value:
+                  titulo: Cestas
+                  descricao: Alimentos
+                  tipo: item
+                  unidade: cesta
+                  meta: '100.00'
+                  data_inicio: '2026-10-06'
+                  data_fim: '2026-10-16'
+        required: true
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanhaResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    titulo: Cestas
+                    descricao: Alimentos
+                    tipo: item
+                    unidade: cesta
+                    meta: '100.00'
+                    data_inicio: '2026-10-06'
+                    data_fim: '2026-10-16'
+                    status: ativa
+                    total_confirmado: '15.00'
+                    percentual_meta: '15.00'
+                    disponivel: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/campanhas/{id}/:
+    get:
+      operationId: consultar_campanha_publica
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar campanha pública
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Campanhas
+      security:
+      - sessao: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanhaResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    titulo: Cestas
+                    descricao: Alimentos
+                    tipo: item
+                    unidade: cesta
+                    meta: '100.00'
+                    data_inicio: '2026-10-06'
+                    data_fim: '2026-10-16'
+                    status: ativa
+                    total_confirmado: '15.00'
+                    percentual_meta: '15.00'
+                    disponivel: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    patch:
+      operationId: editar_minha_campanha
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Editar minha campanha
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Campanhas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCampanhaEntrada'
+            examples:
+              Requisição:
+                value:
+                  meta: '150.00'
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanhaResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    titulo: Cestas
+                    descricao: Alimentos
+                    tipo: item
+                    unidade: cesta
+                    meta: '100.00'
+                    data_inicio: '2026-10-06'
+                    data_fim: '2026-10-16'
+                    status: ativa
+                    total_confirmado: '15.00'
+                    percentual_meta: '15.00'
+                    disponivel: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    delete:
+      operationId: excluir_campanha_sem_contribuicoes
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Excluir campanha sem contribuições
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Campanhas
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/campanhas/{id}/estado/:
+    post:
+      operationId: publicar_pausar_reativar_ou_encerrar_campanha
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Publicar, pausar, reativar ou encerrar campanha
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Campanhas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstadoEntrada'
+            examples:
+              Requisição:
+                value:
+                  acao: publicar
+        required: true
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanhaResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    titulo: Cestas
+                    descricao: Alimentos
+                    tipo: item
+                    unidade: cesta
+                    meta: '100.00'
+                    data_inicio: '2026-10-06'
+                    data_fim: '2026-10-16'
+                    status: ativa
+                    total_confirmado: '15.00'
+                    percentual_meta: '15.00'
+                    disponivel: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/contribuicoes/:
+    get:
+      operationId: listar_minhas_contribuicoes
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Listar minhas contribuições
+      parameters:
+      - in: query
+        name: campanha_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: ordering
+        schema:
+          enum:
+          - -criada_em
+          - criada_em
+          type: string
+          minLength: 1
+        description: |-
+          * `-criada_em` - -criada_em
+          * `criada_em` - criada_em
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: status
+        schema:
+          enum:
+          - declarada
+          - aceita
+          - confirmada
+          - recusada
+          - cancelada
+          type: string
+          minLength: 1
+        description: |-
+          * `declarada` - Declarada
+          * `aceita` - Aceita
+          * `confirmada` - Confirmada
+          * `recusada` - Recusada
+          * `cancelada` - Cancelada
+      - in: query
+        name: tipo
+        schema:
+          enum:
+          - dinheiro
+          - item
+          - horas
+          type: string
+          minLength: 1
+        description: |-
+          * `dinheiro` - Dinheiro
+          * `item` - Item
+          * `horas` - Horas
+      tags:
+      - Contribuições
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaContribuicaoResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - id: 1
+                      campanha_id: 1
+                      tipo: item
+                      valor: null
+                      quantidade: '15.00'
+                      observacao: Entrega agendada
+                      status: declarada
+                      motivo_avaliacao: ''
+                      avaliada_em: null
+                      criada_em: '2026-10-06T10:00:00-03:00'
+                      atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    post:
+      operationId: declarar_contribuicao_sem_processar_pagamento
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Declarar contribuição sem processar pagamento
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      tags:
+      - Contribuições
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContribuicaoEntrada'
+            examples:
+              Requisição:
+                value:
+                  campanha_id: 1
+                  tipo: item
+                  quantidade: '2.00'
+                  observacao: Entrego amanhã.
+        required: true
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContribuicaoResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    campanha_id: 1
+                    tipo: item
+                    valor: null
+                    quantidade: '15.00'
+                    observacao: Entrega agendada
+                    status: declarada
+                    motivo_avaliacao: ''
+                    avaliada_em: null
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/contribuicoes/{id}/:
+    get:
+      operationId: consultar_contribuicao_propria_ou_recebida
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar contribuição própria ou recebida
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Contribuições
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContribuicaoDetalhe'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    campanha_id: 1
+                    tipo: item
+                    valor: null
+                    quantidade: '15.00'
+                    observacao: Entrega agendada
+                    status: declarada
+                    motivo_avaliacao: ''
+                    avaliada_em: null
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    patch:
+      operationId: editar_minha_contribuicao_declarada
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Editar minha contribuição declarada
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Contribuições
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedContribuicaoEdicao'
+            examples:
+              Requisição:
+                value:
+                  quantidade: '3.00'
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContribuicaoResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    campanha_id: 1
+                    tipo: item
+                    valor: null
+                    quantidade: '15.00'
+                    observacao: Entrega agendada
+                    status: declarada
+                    motivo_avaliacao: ''
+                    avaliada_em: null
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/contribuicoes/{id}/avaliacao/:
+    post:
+      operationId: aceitar_confirmar_ou_recusar_contribuicao_recebida
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Aceitar, confirmar ou recusar contribuição recebida
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Contribuições
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvaliacaoEntrada'
+            examples:
+              Requisição:
+                value:
+                  acao: confirmar
+        required: true
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContribuicaoResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    campanha_id: 1
+                    tipo: item
+                    valor: null
+                    quantidade: '15.00'
+                    observacao: Entrega agendada
+                    status: declarada
+                    motivo_avaliacao: ''
+                    avaliada_em: null
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/contribuicoes/{id}/cancelar/:
+    post:
+      operationId: cancelar_minha_contribuicao
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Cancelar minha contribuição
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Contribuições
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContribuicaoResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    campanha_id: 1
+                    tipo: item
+                    valor: null
+                    quantidade: '15.00'
+                    observacao: Entrega agendada
+                    status: declarada
+                    motivo_avaliacao: ''
+                    avaliada_em: null
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/enderecos/cep/{cep}/:
+    get:
+      operationId: v1_enderecos_cep_retrieve
+      description: 'Contrato legado: erros de CEP mantêm codigo e mensagem, sem campos.
+        Limite por usuário com Retry-After.'
+      summary: Consultar CEP com sessão (10 consultas por minuto)
+      parameters:
+      - in: path
+        name: cep
+        schema:
+          type: string
+        required: true
+      tags:
+      - Endereços
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnderecoCEP'
+              examples:
+                Endereço:
+                  value:
+                    cep: '01001000'
+                    logradouro: Praça da Sé
+                    bairro: Sé
+                    cidade: São Paulo
+                    uf: SP
+                    origem: cache
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroCEPLegado'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroCEPLegado'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroCEPLegado'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroCEPLegado'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroCEPLegado'
+          description: ''
+  /api/v1/ongs/:
+    get:
+      operationId: listar_ongs_aprovadas
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Listar ONGs aprovadas
+      parameters:
+      - in: query
+        name: bairro
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: cidade
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: ordering
+        schema:
+          enum:
+          - nome
+          - -atualizada_em
+          type: string
+          minLength: 1
+        description: |-
+          * `nome` - nome
+          * `-atualizada_em` - -atualizada_em
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: q
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: uf
+        schema:
+          enum:
+          - AC
+          - AL
+          - AP
+          - AM
+          - BA
+          - CE
+          - DF
+          - ES
+          - GO
+          - MA
+          - MT
+          - MS
+          - MG
+          - PA
+          - PB
+          - PR
+          - PE
+          - PI
+          - RJ
+          - RN
+          - RS
+          - RO
+          - RR
+          - SC
+          - SP
+          - SE
+          - TO
+          type: string
+          minLength: 1
+        description: |-
+          * `AC` - AC
+          * `AL` - AL
+          * `AP` - AP
+          * `AM` - AM
+          * `BA` - BA
+          * `CE` - CE
+          * `DF` - DF
+          * `ES` - ES
+          * `GO` - GO
+          * `MA` - MA
+          * `MT` - MT
+          * `MS` - MS
+          * `MG` - MG
+          * `PA` - PA
+          * `PB` - PB
+          * `PR` - PR
+          * `PE` - PE
+          * `PI` - PI
+          * `RJ` - RJ
+          * `RN` - RN
+          * `RS` - RS
+          * `RO` - RO
+          * `RR` - RR
+          * `SC` - SC
+          * `SP` - SP
+          * `SE` - SE
+          * `TO` - TO
+      tags:
+      - ONGs
+      security:
+      - sessao: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaOngPublica'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - id: 1
+                      nome: Amigos
+                      descricao: Apoio social
+                      causa: Educação
+                      email_contato: contato@example.org
+                      telefone: ''
+                      site: ''
+                      endereco:
+                        cep: '01001000'
+                        logradouro: Praça da Sé
+                        numero: '10'
+                        complemento: ''
+                        bairro: Sé
+                        cidade: São Paulo
+                        uf: SP
+                      instrucoes_recebimento: Agende a entrega.
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    post:
+      operationId: cadastrar_minha_ong_para_analise
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Cadastrar minha ONG para análise
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      tags:
+      - ONGs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OngEntrada'
+            examples:
+              Requisição:
+                value:
+                  nome: Amigos
+                  descricao: Apoio social
+                  causa: Educação
+                  email_contato: contato@example.org
+                  cep: '01001000'
+                  logradouro: Praça da Sé
+                  numero: '10'
+                  bairro: Sé
+                  cidade: São Paulo
+                  uf: SP
+                  instrucoes_recebimento: Agende a entrega.
+        required: true
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OngPrivada'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    nome: Amigos
+                    descricao: Apoio social
+                    causa: Educação
+                    email_contato: contato@example.org
+                    telefone: ''
+                    site: ''
+                    endereco:
+                      cep: '01001000'
+                      logradouro: Praça da Sé
+                      numero: '10'
+                      complemento: ''
+                      bairro: Sé
+                      cidade: São Paulo
+                      uf: SP
+                    instrucoes_recebimento: Agende a entrega.
+                    cnpj: null
+                    status: pendente
+                    motivo_analise: ''
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/ongs/{id}/:
+    get:
+      operationId: consultar_ong_aprovada
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar ONG aprovada
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - ONGs
+      security:
+      - sessao: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OngPublica'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    nome: Amigos
+                    descricao: Apoio social
+                    causa: Educação
+                    email_contato: contato@example.org
+                    telefone: ''
+                    site: ''
+                    endereco:
+                      cep: '01001000'
+                      logradouro: Praça da Sé
+                      numero: '10'
+                      complemento: ''
+                      bairro: Sé
+                      cidade: São Paulo
+                      uf: SP
+                    instrucoes_recebimento: Agende a entrega.
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    patch:
+      operationId: editar_minha_ong
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Editar minha ONG
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - ONGs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOngEntrada'
+            examples:
+              Requisição:
+                value:
+                  nome: Novo nome
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OngPrivada'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    nome: Amigos
+                    descricao: Apoio social
+                    causa: Educação
+                    email_contato: contato@example.org
+                    telefone: ''
+                    site: ''
+                    endereco:
+                      cep: '01001000'
+                      logradouro: Praça da Sé
+                      numero: '10'
+                      complemento: ''
+                      bairro: Sé
+                      cidade: São Paulo
+                      uf: SP
+                    instrucoes_recebimento: Agende a entrega.
+                    cnpj: null
+                    status: pendente
+                    motivo_analise: ''
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    delete:
+      operationId: excluir_minha_ong_sem_dependencias
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Excluir minha ONG sem dependências
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - ONGs
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/ongs/{id}/reenviar/:
+    post:
+      operationId: reenviar_ong_recusada_para_analise
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Reenviar ONG recusada para análise
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - ONGs
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OngPrivada'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    nome: Amigos
+                    descricao: Apoio social
+                    causa: Educação
+                    email_contato: contato@example.org
+                    telefone: ''
+                    site: ''
+                    endereco:
+                      cep: '01001000'
+                      logradouro: Praça da Sé
+                      numero: '10'
+                      complemento: ''
+                      bairro: Sé
+                      cidade: São Paulo
+                      uf: SP
+                    instrucoes_recebimento: Agende a entrega.
+                    cnpj: null
+                    status: pendente
+                    motivo_analise: ''
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/painel/campanhas/:
+    get:
+      operationId: listar_minhas_campanhas_incluindo_rascunhos
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Listar minhas campanhas, incluindo rascunhos
+      parameters:
+      - in: query
+        name: bairro
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: cidade
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: disponivel
+        schema:
+          type: boolean
+      - in: query
+        name: ong_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: ordering
+        schema:
+          enum:
+          - -criada_em
+          - data_fim
+          - titulo
+          type: string
+          minLength: 1
+        description: |-
+          * `-criada_em` - -criada_em
+          * `data_fim` - data_fim
+          * `titulo` - titulo
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: q
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: status
+        schema:
+          enum:
+          - rascunho
+          - ativa
+          - pausada
+          - encerrada
+          type: string
+          minLength: 1
+        description: |-
+          * `rascunho` - Rascunho
+          * `ativa` - Ativa
+          * `pausada` - Pausada
+          * `encerrada` - Encerrada
+      - in: query
+        name: tipo
+        schema:
+          enum:
+          - dinheiro
+          - item
+          - horas
+          type: string
+          minLength: 1
+        description: |-
+          * `dinheiro` - Dinheiro
+          * `item` - Item
+          * `horas` - Horas
+      - in: query
+        name: uf
+        schema:
+          enum:
+          - AC
+          - AL
+          - AP
+          - AM
+          - BA
+          - CE
+          - DF
+          - ES
+          - GO
+          - MA
+          - MT
+          - MS
+          - MG
+          - PA
+          - PB
+          - PR
+          - PE
+          - PI
+          - RJ
+          - RN
+          - RS
+          - RO
+          - RR
+          - SC
+          - SP
+          - SE
+          - TO
+          type: string
+          minLength: 1
+        description: |-
+          * `AC` - AC
+          * `AL` - AL
+          * `AP` - AP
+          * `AM` - AM
+          * `BA` - BA
+          * `CE` - CE
+          * `DF` - DF
+          * `ES` - ES
+          * `GO` - GO
+          * `MA` - MA
+          * `MT` - MT
+          * `MS` - MS
+          * `MG` - MG
+          * `PA` - PA
+          * `PB` - PB
+          * `PR` - PR
+          * `PE` - PE
+          * `PI` - PI
+          * `RJ` - RJ
+          * `RN` - RN
+          * `RS` - RS
+          * `RO` - RO
+          * `RR` - RR
+          * `SC` - SC
+          * `SP` - SP
+          * `SE` - SE
+          * `TO` - TO
+      tags:
+      - Campanhas
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaCampanhaResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - id: 1
+                      ong_id: 1
+                      titulo: Cestas
+                      descricao: Alimentos
+                      tipo: item
+                      unidade: cesta
+                      meta: '100.00'
+                      data_inicio: '2026-10-06'
+                      data_fim: '2026-10-16'
+                      status: ativa
+                      total_confirmado: '15.00'
+                      percentual_meta: '15.00'
+                      disponivel: true
+                      criada_em: '2026-10-06T10:00:00-03:00'
+                      atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/painel/campanhas/{id}/:
+    get:
+      operationId: consultar_minha_campanha_incluindo_rascunho
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar minha campanha, incluindo rascunho
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Campanhas
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanhaResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    titulo: Cestas
+                    descricao: Alimentos
+                    tipo: item
+                    unidade: cesta
+                    meta: '100.00'
+                    data_inicio: '2026-10-06'
+                    data_fim: '2026-10-16'
+                    status: ativa
+                    total_confirmado: '15.00'
+                    percentual_meta: '15.00'
+                    disponivel: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/painel/contribuicoes/:
+    get:
+      operationId: listar_contribuicoes_recebidas_pela_minha_ong
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Listar contribuições recebidas pela minha ONG
+      parameters:
+      - in: query
+        name: campanha_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: ordering
+        schema:
+          enum:
+          - -criada_em
+          - criada_em
+          type: string
+          minLength: 1
+        description: |-
+          * `-criada_em` - -criada_em
+          * `criada_em` - criada_em
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: status
+        schema:
+          enum:
+          - declarada
+          - aceita
+          - confirmada
+          - recusada
+          - cancelada
+          type: string
+          minLength: 1
+        description: |-
+          * `declarada` - Declarada
+          * `aceita` - Aceita
+          * `confirmada` - Confirmada
+          * `recusada` - Recusada
+          * `cancelada` - Cancelada
+      - in: query
+        name: tipo
+        schema:
+          enum:
+          - dinheiro
+          - item
+          - horas
+          type: string
+          minLength: 1
+        description: |-
+          * `dinheiro` - Dinheiro
+          * `item` - Item
+          * `horas` - Horas
+      tags:
+      - Contribuições
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaContribuicaoRecebida'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - id: 1
+                      campanha_id: 1
+                      tipo: item
+                      valor: null
+                      quantidade: '15.00'
+                      observacao: Entrega agendada
+                      status: declarada
+                      motivo_avaliacao: ''
+                      avaliada_em: null
+                      criada_em: '2026-10-06T10:00:00-03:00'
+                      atualizada_em: '2026-10-06T10:00:00-03:00'
+                      contato_autor:
+                        nome: Maria Silva
+                        email: maria@example.org
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/painel/ong/:
+    get:
+      operationId: consultar_dados_privados_da_minha_ong
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar dados privados da minha ONG
+      tags:
+      - ONGs
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OngPrivada'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    nome: Amigos
+                    descricao: Apoio social
+                    causa: Educação
+                    email_contato: contato@example.org
+                    telefone: ''
+                    site: ''
+                    endereco:
+                      cep: '01001000'
+                      logradouro: Praça da Sé
+                      numero: '10'
+                      complemento: ''
+                      bairro: Sé
+                      cidade: São Paulo
+                      uf: SP
+                    instrucoes_recebimento: Agende a entrega.
+                    cnpj: null
+                    status: pendente
+                    motivo_analise: ''
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/painel/postagens/:
+    get:
+      operationId: listar_minhas_postagens_incluindo_rascunhos
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Listar minhas postagens, incluindo rascunhos
+      parameters:
+      - in: query
+        name: campanha_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: ong_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: ordering
+        schema:
+          enum:
+          - -criada_em
+          - titulo
+          type: string
+          minLength: 1
+        description: |-
+          * `-criada_em` - -criada_em
+          * `titulo` - titulo
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: publicada
+        schema:
+          type: boolean
+      - in: query
+        name: q
+        schema:
+          type: string
+          maxLength: 100
+      tags:
+      - Postagens
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaPostagemResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - id: 1
+                      ong_id: 1
+                      campanha_id: 1
+                      titulo: Novidades
+                      conteudo: Doações recebidas
+                      publicada: true
+                      criada_em: '2026-10-06T10:00:00-03:00'
+                      atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/painel/postagens/{id}/:
+    get:
+      operationId: consultar_minha_postagem_incluindo_rascunho
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar minha postagem, incluindo rascunho
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Postagens
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostagemResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    campanha_id: 1
+                    titulo: Novidades
+                    conteudo: Doações recebidas
+                    publicada: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/postagens/:
+    get:
+      operationId: listar_postagens_publicadas
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Listar postagens publicadas
+      parameters:
+      - in: query
+        name: campanha_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: ong_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: ordering
+        schema:
+          enum:
+          - -criada_em
+          - titulo
+          type: string
+          minLength: 1
+        description: |-
+          * `-criada_em` - -criada_em
+          * `titulo` - titulo
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: q
+        schema:
+          type: string
+          maxLength: 100
+      tags:
+      - Postagens
+      security:
+      - sessao: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaPostagemResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - id: 1
+                      ong_id: 1
+                      campanha_id: 1
+                      titulo: Novidades
+                      conteudo: Doações recebidas
+                      publicada: true
+                      criada_em: '2026-10-06T10:00:00-03:00'
+                      atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    post:
+      operationId: criar_postagem_da_minha_ong
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Criar postagem da minha ONG
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      tags:
+      - Postagens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostagemEntrada'
+            examples:
+              Requisição:
+                value:
+                  titulo: Novidades
+                  conteudo: Recebemos doações.
+                  publicada: true
+        required: true
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostagemResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    campanha_id: 1
+                    titulo: Novidades
+                    conteudo: Doações recebidas
+                    publicada: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/postagens/{id}/:
+    get:
+      operationId: consultar_postagem_publicada
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar postagem publicada
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Postagens
+      security:
+      - sessao: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostagemResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    campanha_id: 1
+                    titulo: Novidades
+                    conteudo: Doações recebidas
+                    publicada: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    patch:
+      operationId: editar_minha_postagem
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Editar minha postagem
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Postagens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPostagemEntrada'
+            examples:
+              Requisição:
+                value:
+                  publicada: true
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostagemResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    id: 1
+                    ong_id: 1
+                    campanha_id: 1
+                    titulo: Novidades
+                    conteudo: Doações recebidas
+                    publicada: true
+                    criada_em: '2026-10-06T10:00:00-03:00'
+                    atualizada_em: '2026-10-06T10:00:00-03:00'
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+    delete:
+      operationId: excluir_minha_postagem
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Excluir minha postagem
+      parameters:
+      - in: header
+        name: X-CSRFToken
+        schema:
+          type: string
+        description: Token obtido em auth/csrf/. Envie também o cookie csrftoken.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Postagens
+      security:
+      - sessao: []
+        csrf: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/relatorios/campanhas/:
+    get:
+      operationId: consultar_relatorio_por_criacao_da_contribuicao
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Consultar relatório por criação da contribuição
+      parameters:
+      - in: query
+        name: campanha_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: fim
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: inicio
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: tipo
+        schema:
+          enum:
+          - dinheiro
+          - item
+          - horas
+          type: string
+          minLength: 1
+        description: |-
+          * `dinheiro` - Dinheiro
+          * `item` - Item
+          * `horas` - Horas
+      tags:
+      - Relatórios
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelatorioResposta'
+              examples:
+                RespostaDeSucesso:
+                  value:
+                    inicio: '2026-10-06'
+                    fim: '2026-10-06'
+                    gerado_em: '2026-10-06T10:00:00-03:00'
+                    criterio_periodo: criacao_contribuicao
+                    campanhas:
+                    - campanha_id: 1
+                      titulo: Cestas
+                      tipo: item
+                      unidade: cesta
+                      meta: '100.00'
+                      total_confirmado: '15.00'
+                      declaradas: 0
+                      aceitas: 0
+                      confirmadas: 1
+                      recusadas: 0
+                      canceladas: 0
+                  summary: Resposta de sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+  /api/v1/relatorios/campanhas/exportar/:
+    get:
+      operationId: exportar_o_mesmo_csv_do_relatorio_da_tela
+      description: 'Erros seguem o envelope erro{codigo,mensagem,campos}. Campos e
+        queries desconhecidos são rejeitados. Corpo JSON: até 64 KiB. Limites: leitura
+        pública 60/min por IP, sessão 120/min, escrita 30/min por usuário; login 5/min
+        por IP+username e cadastro 5/min por IP.'
+      summary: Exportar o mesmo CSV do relatório da tela
+      parameters:
+      - in: query
+        name: campanha_id
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: fim
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: inicio
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: tipo
+        schema:
+          enum:
+          - dinheiro
+          - item
+          - horas
+          type: string
+          minLength: 1
+        description: |-
+          * `dinheiro` - Dinheiro
+          * `item` - Item
+          * `horas` - Horas
+      tags:
+      - Relatórios
+      security:
+      - sessao: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+              examples:
+                ErroDeValidação:
+                  value:
+                    erro:
+                      codigo: validacao
+                      mensagem: Confira os campos informados.
+                      campos:
+                        campo:
+                        - Campo desconhecido ou protegido.
+                  summary: Erro de validação
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '429':
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Segundos até permitir nova tentativa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResposta'
+          description: ''
+components:
+  schemas:
+    AnaliseEntrada:
+      type: object
+      properties:
+        decisao:
+          $ref: '#/components/schemas/DecisaoEnum'
+        motivo:
+          type: string
+          maxLength: 500
+      required:
+      - decisao
+    AvaliacaoEntrada:
+      type: object
+      properties:
+        acao:
+          $ref: '#/components/schemas/AvaliacaoEntradaAcaoEnum'
+        motivo:
+          type: string
+          maxLength: 500
+      required:
+      - acao
+    AvaliacaoEntradaAcaoEnum:
+      enum:
+      - aceitar
+      - confirmar
+      - recusar
+      type: string
+      description: |-
+        * `aceitar` - aceitar
+        * `confirmar` - confirmar
+        * `recusar` - recusar
+    CSRFResposta:
+      type: object
+      properties:
+        csrf_token:
+          type: string
+      required:
+      - csrf_token
+    CadastroEntrada:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+        password_confirm:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - first_name
+      - password
+      - password_confirm
+      - username
+    CampanhaEntrada:
+      type: object
+      properties:
+        titulo:
+          type: string
+          title: Título
+          maxLength: 150
+        descricao:
+          type: string
+          title: Descrição
+          maxLength: 5000
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        unidade:
+          type: string
+          maxLength: 30
+        meta:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        data_inicio:
+          type: string
+          format: date
+          title: Data de início
+        data_fim:
+          type: string
+          format: date
+          title: Data de fim
+      required:
+      - data_fim
+      - data_inicio
+      - descricao
+      - meta
+      - tipo
+      - titulo
+      - unidade
+    CampanhaResposta:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ong_id:
+          type: integer
+          readOnly: true
+        titulo:
+          type: string
+          title: Título
+          maxLength: 150
+        descricao:
+          type: string
+          title: Descrição
+          maxLength: 5000
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        unidade:
+          type: string
+          maxLength: 30
+        meta:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        data_inicio:
+          type: string
+          format: date
+          title: Data de início
+        data_fim:
+          type: string
+          format: date
+          title: Data de fim
+        status:
+          $ref: '#/components/schemas/CampanhaStatusEnum'
+        total_confirmado:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,22}(?:\.\d{0,2})?$
+          readOnly: true
+        percentual_meta:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          readOnly: true
+        disponivel:
+          type: boolean
+          readOnly: true
+        criada_em:
+          type: string
+          format: date-time
+          readOnly: true
+        atualizada_em:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - atualizada_em
+      - criada_em
+      - data_fim
+      - data_inicio
+      - descricao
+      - disponivel
+      - id
+      - meta
+      - ong_id
+      - percentual_meta
+      - tipo
+      - titulo
+      - total_confirmado
+      - unidade
+    CampanhaStatusEnum:
+      enum:
+      - rascunho
+      - ativa
+      - pausada
+      - encerrada
+      type: string
+      description: |-
+        * `rascunho` - Rascunho
+        * `ativa` - Ativa
+        * `pausada` - Pausada
+        * `encerrada` - Encerrada
+    ContatoAutor:
+      type: object
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+      - email
+      - nome
+    ContribuicaoDetalhe:
+      oneOf:
+      - $ref: '#/components/schemas/ContribuicaoResposta'
+      - $ref: '#/components/schemas/ContribuicaoRecebida'
+    ContribuicaoEntrada:
+      type: object
+      properties:
+        campanha_id:
+          type: integer
+          minimum: 1
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        valor:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        quantidade:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        observacao:
+          type: string
+          maxLength: 500
+      required:
+      - campanha_id
+      - tipo
+    ContribuicaoRecebida:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        campanha_id:
+          type: integer
+          readOnly: true
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        valor:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          title: Valor (BRL)
+        quantidade:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        observacao:
+          type: string
+          title: Observação
+          maxLength: 500
+        status:
+          $ref: '#/components/schemas/ContribuicaoStatusEnum'
+        motivo_avaliacao:
+          type: string
+          maxLength: 500
+        avaliada_em:
+          type: string
+          format: date-time
+          nullable: true
+        criada_em:
+          type: string
+          format: date-time
+          readOnly: true
+        atualizada_em:
+          type: string
+          format: date-time
+          readOnly: true
+        contato_autor:
+          allOf:
+          - $ref: '#/components/schemas/ContatoAutor'
+          readOnly: true
+      required:
+      - atualizada_em
+      - campanha_id
+      - contato_autor
+      - criada_em
+      - id
+      - tipo
+    ContribuicaoResposta:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        campanha_id:
+          type: integer
+          readOnly: true
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        valor:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          title: Valor (BRL)
+        quantidade:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        observacao:
+          type: string
+          title: Observação
+          maxLength: 500
+        status:
+          $ref: '#/components/schemas/ContribuicaoStatusEnum'
+        motivo_avaliacao:
+          type: string
+          maxLength: 500
+        avaliada_em:
+          type: string
+          format: date-time
+          nullable: true
+        criada_em:
+          type: string
+          format: date-time
+          readOnly: true
+        atualizada_em:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - atualizada_em
+      - campanha_id
+      - criada_em
+      - id
+      - tipo
+    ContribuicaoStatusEnum:
+      enum:
+      - declarada
+      - aceita
+      - confirmada
+      - recusada
+      - cancelada
+      type: string
+      description: |-
+        * `declarada` - Declarada
+        * `aceita` - Aceita
+        * `confirmada` - Confirmada
+        * `recusada` - Recusada
+        * `cancelada` - Cancelada
+    DecisaoEnum:
+      enum:
+      - aprovar
+      - recusar
+      type: string
+      description: |-
+        * `aprovar` - aprovar
+        * `recusar` - recusar
+    DetalheErroCEP:
+      type: object
+      properties:
+        codigo:
+          type: string
+        mensagem:
+          type: string
+      required:
+      - codigo
+      - mensagem
+    Endereco:
+      type: object
+      properties:
+        cep:
+          type: string
+        logradouro:
+          type: string
+        numero:
+          type: string
+        complemento:
+          type: string
+        bairro:
+          type: string
+        cidade:
+          type: string
+        uf:
+          type: string
+      required:
+      - bairro
+      - cep
+      - cidade
+      - complemento
+      - logradouro
+      - numero
+      - uf
+    EnderecoCEP:
+      type: object
+      properties:
+        cep:
+          type: string
+        logradouro:
+          type: string
+        bairro:
+          type: string
+        cidade:
+          type: string
+        uf:
+          type: string
+        origem:
+          type: string
+      required:
+      - bairro
+      - cep
+      - cidade
+      - logradouro
+      - origem
+      - uf
+    ErroCEPLegado:
+      type: object
+      properties:
+        erro:
+          $ref: '#/components/schemas/DetalheErroCEP'
+      required:
+      - erro
+    ErroDetalhe:
+      type: object
+      properties:
+        codigo:
+          type: string
+        mensagem:
+          type: string
+        campos:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+      required:
+      - campos
+      - codigo
+      - mensagem
+    ErroResposta:
+      type: object
+      properties:
+        erro:
+          $ref: '#/components/schemas/ErroDetalhe'
+      required:
+      - erro
+    EstadoEntrada:
+      type: object
+      properties:
+        acao:
+          $ref: '#/components/schemas/EstadoEntradaAcaoEnum'
+      required:
+      - acao
+    EstadoEntradaAcaoEnum:
+      enum:
+      - publicar
+      - pausar
+      - reativar
+      - encerrar
+      type: string
+      description: |-
+        * `publicar` - publicar
+        * `pausar` - pausar
+        * `reativar` - reativar
+        * `encerrar` - encerrar
+    LinhaRelatorio:
+      type: object
+      properties:
+        campanha_id:
+          type: integer
+        titulo:
+          type: string
+        tipo:
+          type: string
+        unidade:
+          type: string
+        meta:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        total_confirmado:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,22}(?:\.\d{0,2})?$
+        declaradas:
+          type: integer
+        aceitas:
+          type: integer
+        confirmadas:
+          type: integer
+        recusadas:
+          type: integer
+        canceladas:
+          type: integer
+      required:
+      - aceitas
+      - campanha_id
+      - canceladas
+      - confirmadas
+      - declaradas
+      - meta
+      - recusadas
+      - tipo
+      - titulo
+      - total_confirmado
+      - unidade
+    LoginEntrada:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+    MeuUsuario:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          title: Usuário
+          description: Obrigatório. 150 caracteres ou menos. Letras, números e @/./+/-/_
+            apenas.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          title: Nome
+          maxLength: 150
+        last_name:
+          type: string
+          title: Último nome
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: E-mail
+          maxLength: 254
+        ong_id:
+          type: integer
+          readOnly: true
+          nullable: true
+      required:
+      - email
+      - first_name
+      - id
+      - ong_id
+      - username
+    OngEntrada:
+      type: object
+      properties:
+        nome:
+          type: string
+          maxLength: 150
+        descricao:
+          type: string
+          title: Descrição
+          maxLength: 5000
+        causa:
+          type: string
+          maxLength: 80
+        cnpj:
+          type: string
+          nullable: true
+        email_contato:
+          type: string
+          format: email
+          title: E-mail de contato
+          maxLength: 254
+        telefone:
+          type: string
+          maxLength: 20
+        site:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        cep:
+          type: string
+          maxLength: 9
+        logradouro:
+          type: string
+          maxLength: 200
+        numero:
+          type: string
+          title: Número
+          maxLength: 20
+        complemento:
+          type: string
+          maxLength: 120
+        bairro:
+          type: string
+          maxLength: 100
+        cidade:
+          type: string
+          maxLength: 100
+        uf:
+          type: string
+          maxLength: 2
+        instrucoes_recebimento:
+          type: string
+          title: Instruções de recebimento
+          maxLength: 2000
+      required:
+      - bairro
+      - causa
+      - cep
+      - cidade
+      - descricao
+      - email_contato
+      - instrucoes_recebimento
+      - logradouro
+      - nome
+      - numero
+      - uf
+    OngPrivada:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nome:
+          type: string
+          maxLength: 150
+        descricao:
+          type: string
+          title: Descrição
+          maxLength: 5000
+        causa:
+          type: string
+          maxLength: 80
+        email_contato:
+          type: string
+          format: email
+          title: E-mail de contato
+          maxLength: 254
+        telefone:
+          type: string
+          maxLength: 20
+        site:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+        instrucoes_recebimento:
+          type: string
+          title: Instruções de recebimento
+          maxLength: 2000
+        cnpj:
+          nullable: true
+          oneOf:
+          - type: string
+            pattern: ^[0-9]{14}$
+            maxLength: 14
+          - type: string
+            maxLength: 0
+        status:
+          $ref: '#/components/schemas/OngStatusEnum'
+        motivo_analise:
+          type: string
+          maxLength: 500
+        criada_em:
+          type: string
+          format: date-time
+          readOnly: true
+        atualizada_em:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - atualizada_em
+      - causa
+      - criada_em
+      - descricao
+      - email_contato
+      - endereco
+      - id
+      - instrucoes_recebimento
+      - nome
+    OngPublica:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nome:
+          type: string
+          maxLength: 150
+        descricao:
+          type: string
+          title: Descrição
+          maxLength: 5000
+        causa:
+          type: string
+          maxLength: 80
+        email_contato:
+          type: string
+          format: email
+          title: E-mail de contato
+          maxLength: 254
+        telefone:
+          type: string
+          maxLength: 20
+        site:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+        instrucoes_recebimento:
+          type: string
+          title: Instruções de recebimento
+          maxLength: 2000
+      required:
+      - causa
+      - descricao
+      - email_contato
+      - endereco
+      - id
+      - instrucoes_recebimento
+      - nome
+    OngStatusEnum:
+      enum:
+      - pendente
+      - aprovada
+      - recusada
+      type: string
+      description: |-
+        * `pendente` - Pendente
+        * `aprovada` - Aprovada
+        * `recusada` - Recusada
+    PaginaCampanhaResposta:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CampanhaResposta'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    PaginaContribuicaoRecebida:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContribuicaoRecebida'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    PaginaContribuicaoResposta:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContribuicaoResposta'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    PaginaOngPrivada:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OngPrivada'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    PaginaOngPublica:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OngPublica'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    PaginaPostagemResposta:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostagemResposta'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    PatchedCampanhaEntrada:
+      type: object
+      properties:
+        titulo:
+          type: string
+          title: Título
+          maxLength: 150
+        descricao:
+          type: string
+          title: Descrição
+          maxLength: 5000
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        unidade:
+          type: string
+          maxLength: 30
+        meta:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        data_inicio:
+          type: string
+          format: date
+          title: Data de início
+        data_fim:
+          type: string
+          format: date
+          title: Data de fim
+    PatchedContribuicaoEdicao:
+      type: object
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        valor:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        quantidade:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        observacao:
+          type: string
+          maxLength: 500
+    PatchedOngEntrada:
+      type: object
+      properties:
+        nome:
+          type: string
+          maxLength: 150
+        descricao:
+          type: string
+          title: Descrição
+          maxLength: 5000
+        causa:
+          type: string
+          maxLength: 80
+        cnpj:
+          type: string
+          nullable: true
+        email_contato:
+          type: string
+          format: email
+          title: E-mail de contato
+          maxLength: 254
+        telefone:
+          type: string
+          maxLength: 20
+        site:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        cep:
+          type: string
+          maxLength: 9
+        logradouro:
+          type: string
+          maxLength: 200
+        numero:
+          type: string
+          title: Número
+          maxLength: 20
+        complemento:
+          type: string
+          maxLength: 120
+        bairro:
+          type: string
+          maxLength: 100
+        cidade:
+          type: string
+          maxLength: 100
+        uf:
+          type: string
+          maxLength: 2
+        instrucoes_recebimento:
+          type: string
+          title: Instruções de recebimento
+          maxLength: 2000
+    PatchedPostagemEntrada:
+      type: object
+      properties:
+        titulo:
+          type: string
+          title: Título
+          maxLength: 150
+        conteudo:
+          type: string
+          title: Conteúdo
+          maxLength: 5000
+        campanha_id:
+          type: integer
+          minimum: 1
+          nullable: true
+        publicada:
+          type: boolean
+    PostagemEntrada:
+      type: object
+      properties:
+        titulo:
+          type: string
+          title: Título
+          maxLength: 150
+        conteudo:
+          type: string
+          title: Conteúdo
+          maxLength: 5000
+        campanha_id:
+          type: integer
+          minimum: 1
+          nullable: true
+        publicada:
+          type: boolean
+      required:
+      - conteudo
+      - titulo
+    PostagemResposta:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ong_id:
+          type: integer
+          readOnly: true
+        campanha_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        titulo:
+          type: string
+          title: Título
+          maxLength: 150
+        conteudo:
+          type: string
+          title: Conteúdo
+          maxLength: 5000
+        publicada:
+          type: boolean
+        criada_em:
+          type: string
+          format: date-time
+          readOnly: true
+        atualizada_em:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - atualizada_em
+      - campanha_id
+      - conteudo
+      - criada_em
+      - id
+      - ong_id
+      - titulo
+    RelatorioResposta:
+      type: object
+      properties:
+        inicio:
+          type: string
+          format: date
+        fim:
+          type: string
+          format: date
+        gerado_em:
+          type: string
+          format: date-time
+        criterio_periodo:
+          type: string
+          default: criacao_contribuicao
+        campanhas:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinhaRelatorio'
+      required:
+      - campanhas
+      - fim
+      - gerado_em
+      - inicio
+    TipoEnum:
+      enum:
+      - dinheiro
+      - item
+      - horas
+      type: string
+      description: |-
+        * `dinheiro` - Dinheiro
+        * `item` - Item
+        * `horas` - Horas
+    UsuarioBasico:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          title: Usuário
+          description: Obrigatório. 150 caracteres ou menos. Letras, números e @/./+/-/_
+            apenas.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          title: Nome
+          maxLength: 150
+      required:
+      - first_name
+      - id
+      - username
+  securitySchemes:
+    csrf:
+      type: apiKey
+      in: header
+      name: X-CSRFToken
+      description: Obtenha o cookie e o token em /api/v1/auth/csrf/. Obrigatório nas
+        mutações.
+    sessao:
+      type: apiKey
+      in: cookie
+      name: sessionid
