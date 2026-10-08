@@ -3,7 +3,7 @@
 Aplicação web em Django que reúne ONGs e suas campanhas e registra contribuições em dinheiro, itens e horas de voluntariado. **A plataforma não processa pagamentos**: transferências, entregas e atividades acontecem fora do sistema, e só contribuições confirmadas pela ONG entram nos totais.
 
 **Instituição:** UniCEUB · **Curso:** Ciência da Computação · **Disciplina:** Desenvolvimento Web (turma B, matutino)
-**Professor:** Felippe Pires Ferreira · **Integrante:** Matheus Benjamim de Souza Bosco ([@matheusbosco](https://github.com/matheusbosco)), trabalho individual
+**Professor:** Felippe Pires Ferreira · **Integrante:** Matheus Benjamim de Souza Bosco ([@matheusbosco] **Matrícula:** 22612082. (https://github.com/matheusbosco)), trabalho individual
 **Situação:** em desenvolvimento · **Aplicação publicada:** a publicar · **API (Swagger):** `/api/docs/` na aplicação publicada
 
 ## Documentação
