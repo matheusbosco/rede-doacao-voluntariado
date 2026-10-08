@@ -74,7 +74,9 @@ O CI (`.github/workflows/ci.yml`) roda essas verificações a cada push. A rodad
 
 ## Uso de inteligência artificial
 
-O código, os testes, o CI e a configuração de deploy foram escritos com assistência de IA: o Claude Code (Anthropic) coordenou e o Codex (OpenAI) executou etapas sob direção do autor, que definiu o escopo e as regras, aprovou cada etapa e as verificou. As capturas de tela, o esquema OpenAPI e este README técnico foram gerados por ferramenta a partir do sistema. [O autor deve descrever aqui, com exatidão, qualquer apoio de IA usado nos documentos da Fase 1 em `docs/`.]
+As decisões de projeto (tema, escopo, regras de negócio e fluxos) são do autor, que também revisou todo o material antes da entrega. Ferramentas de IA generativa (ChatGPT/Codex e Claude) foram usadas na redação e na revisão dos documentos da Fase 1 em `docs/`, na geração de diagramas, imagens e PDFs e na conferência técnica contra o código.
+
+O código, os testes, o CI e a configuração de deploy foram escritos com assistência de IA (Claude Code coordenando o Codex), sob direção do autor. As capturas de tela, o esquema OpenAPI e este README técnico foram gerados por ferramenta a partir do sistema.
 
 ## Licença e origem
 
