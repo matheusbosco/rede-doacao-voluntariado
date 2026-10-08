@@ -1,0 +1,111 @@
+Project DAI {
+ database_type: 'PostgreSQL'
+ Note: 'Contas, organizações, campanhas e registros de ajuda local.'
+}
+
+Table accounts_user {
+  id bigint [pk, increment, not null, note: "Número que identifica o registro."]
+  password varchar(128) [not null, note: "Senha protegida por hash."]
+  last_login timestamptz [note: "Última entrada na conta."]
+  is_superuser boolean [not null, note: "Permissão administrativa completa."]
+  username varchar(150) [not null, unique, note: "Nome usado no login. Não se repete."]
+  last_name varchar(150) [not null, note: "Sobrenome da pessoa."]
+  is_staff boolean [not null, note: "Permissão para analisar cadastros de ONG."]
+  is_active boolean [not null, note: "Libera ou bloqueia a autenticação."]
+  date_joined timestamptz [not null, note: "Momento em que a conta foi aberta."]
+  email varchar(254) [not null, unique, note: "E-mail da conta. Não se repete."]
+  first_name varchar(150) [not null, note: "Nome da pessoa."]
+}
+
+Table organizations_ong {
+  id bigint [pk, increment, not null, note: "Número que identifica o registro."]
+  responsavel_id bigint [not null, unique, note: "Conta que administra a organização. Não se repete."]
+  nome varchar(150) [not null, note: "Nome apresentado ao público."]
+  descricao text [not null, note: "Apresentação da ONG."]
+  causa varchar(80) [not null, note: "Área em que a ONG atua."]
+  cnpj varchar(14) [unique, note: "Identificação opcional da organização, com 14 dígitos. Não se repete."]
+  email_contato varchar(254) [not null, note: "Endereço de e-mail para contato público."]
+  telefone varchar(20) [not null, note: "Número de contato, quando informado."]
+  site varchar(200) [not null, note: "Endereço HTTP ou HTTPS da organização."]
+  cep varchar(8) [not null, note: "CEP sem hífen, com oito dígitos."]
+  logradouro varchar(200) [not null, note: "Rua ou outro logradouro do endereço."]
+  numero varchar(20) [not null, note: "Número informado pela ONG."]
+  complemento varchar(120) [not null, note: "Informação extra para localizar o endereço."]
+  bairro varchar(100) [not null, note: "Bairro da organização."]
+  cidade varchar(100) [not null, note: "Município do endereço."]
+  uf varchar(2) [not null, note: "Sigla do estado. Opções: AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO."]
+  instrucoes_recebimento text [not null, note: "Como combinar a ajuda fora da plataforma."]
+  status varchar(8) [not null, note: "Situação atual do cadastro. Opções: pendente, aprovada, recusada."]
+  analisada_por_id bigint [note: "Administrador que decidiu sobre o cadastro."]
+  analisada_em timestamptz [note: "Horário da decisão sobre a ONG."]
+  motivo_analise varchar(500) [not null, note: "Explicação da análise; necessária ao recusar."]
+  criada_em timestamptz [not null, note: "Horário de criação."]
+  atualizada_em timestamptz [not null, note: "Horário da alteração mais recente."]
+}
+
+Table campaigns_campanha {
+  id bigint [pk, increment, not null, note: "Número que identifica o registro."]
+  ong_id bigint [not null, note: "Organização à qual o registro está ligado."]
+  titulo varchar(150) [not null, note: "Nome curto exibido na interface."]
+  descricao text [not null, note: "Necessidade que a campanha quer atender."]
+  tipo varchar(8) [not null, note: "Modalidade de ajuda definida na campanha. Opções: dinheiro, item, horas."]
+  unidade varchar(30) [not null, note: "Medida usada pela campanha."]
+  meta numeric(12,2) [not null, note: "Quantidade ou valor que se pretende alcançar."]
+  data_inicio date [not null, note: "Primeiro dia de recebimento."]
+  data_fim date [not null, note: "Último dia de recebimento."]
+  status varchar(9) [not null, note: "Etapa atual da campanha. Opções: rascunho, ativa, pausada, encerrada."]
+  criada_em timestamptz [not null, note: "Horário de criação."]
+  atualizada_em timestamptz [not null, note: "Horário da alteração mais recente."]
+}
+
+Table contributions_contribuicao {
+  id bigint [pk, increment, not null, note: "Número que identifica o registro."]
+  campanha_id bigint [not null, note: "Campanha associada ao registro."]
+  autor_id bigint [not null, note: "Conta que ofereceu ou declarou a ajuda."]
+  tipo varchar(8) [not null, note: "Modalidade da campanha vinculada. Opções: dinheiro, item, horas."]
+  valor numeric(12,2) [note: "Quantia em reais, usada para dinheiro."]
+  quantidade numeric(12,2) [note: "Medida de itens ou de horas."]
+  observacao varchar(500) [not null, note: "Comentário que acompanha a contribuição."]
+  status varchar(10) [not null, note: "Etapa atual da contribuição. Opções: declarada, aceita, confirmada, recusada, cancelada."]
+  avaliada_por_id bigint [note: "Responsável que tomou a última decisão."]
+  avaliada_em timestamptz [note: "Horário da última avaliação."]
+  motivo_avaliacao varchar(500) [not null, note: "Justificativa da decisão; necessária na recusa."]
+  criada_em timestamptz [not null, note: "Horário de criação."]
+  atualizada_em timestamptz [not null, note: "Horário da alteração mais recente."]
+}
+
+Table organizations_postagem {
+  id bigint [pk, increment, not null, note: "Número que identifica o registro."]
+  ong_id bigint [not null, note: "Organização à qual o registro está ligado."]
+  campanha_id bigint [note: "Campanha associada ao registro."]
+  titulo varchar(150) [not null, note: "Nome curto exibido na interface."]
+  conteudo text [not null, note: "Texto da atualização da ONG."]
+  publicada boolean [not null, note: "Indica se a postagem saiu do rascunho."]
+  criada_em timestamptz [not null, note: "Horário de criação."]
+  atualizada_em timestamptz [not null, note: "Horário da alteração mais recente."]
+}
+
+Table integrations_cachecep {
+  cep varchar(8) [pk, not null, note: "CEP usado como chave do endereço guardado."]
+  logradouro varchar(200) [not null, note: "Rua ou outro logradouro do endereço."]
+  bairro varchar(100) [not null, note: "Bairro da organização."]
+  cidade varchar(100) [not null, note: "Município do endereço."]
+  uf varchar(2) [not null, note: "Sigla do estado."]
+  expira_em timestamptz [not null, note: "Prazo de validade do endereço no cache."]
+}
+
+Ref: organizations_ong.responsavel_id - accounts_user.id [delete: restrict]
+
+Ref: organizations_ong.analisada_por_id > accounts_user.id [delete: restrict]
+
+Ref: campaigns_campanha.ong_id > organizations_ong.id [delete: restrict]
+
+Ref: contributions_contribuicao.campanha_id > campaigns_campanha.id [delete: restrict]
+
+Ref: contributions_contribuicao.autor_id > accounts_user.id [delete: restrict]
+
+Ref: contributions_contribuicao.avaliada_por_id > accounts_user.id [delete: restrict]
+
+Ref: organizations_postagem.ong_id > organizations_ong.id [delete: restrict]
+
+Ref: organizations_postagem.campanha_id > campaigns_campanha.id [delete: set null]
