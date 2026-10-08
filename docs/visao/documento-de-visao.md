@@ -33,7 +33,7 @@ Eu decidi que o DAI não vai processar pagamentos, porque isso aumentaria muito 
 
 ## 8. Restrições
 
-Estou fazendo o projeto sozinho e tenho até 11/12/2026 para entregar a aplicação completa. Então preciso dividir meu tempo entre desenvolvimento, documentação, testes e publicação. Sobre dinheiro e hospedagem, a intenção é usar serviços gratuitos, o que também exige cuidado com os limites desses serviços e com a disponibilidade da aplicação.
+Estou fazendo o projeto sozinho e tenho até 04/12/2026 para entregar a aplicação completa. Então preciso dividir meu tempo entre desenvolvimento, documentação, testes e publicação. Sobre dinheiro e hospedagem, a intenção é usar serviços gratuitos, o que também exige cuidado com os limites desses serviços e com a disponibilidade da aplicação.
 
 ## 9. Premissas
 
