@@ -5,11 +5,11 @@ Autor: Matheus Benjamim de Souza Bosco · Disciplina: Desenvolvimento Web (UniCE
 
 ## 1. Contexto e problema
 
-O problema acontece dos dois lados. Tem gente que quer doar ou ser voluntária, mas não sabe onde encontrar uma ONG próxima e nem do que ela está precisando. E tem ONG precisando de apoio, principalmente uma que está começando agora e depende de redes sociais com poucos seguidores para encontrar essas pessoas. Como as informações ficam espalhadas em vários lugares, quem quer ajudar pode acabar não sabendo por onde começar, enquanto a organização continua sem conseguir o apoio que precisa.
+O problema acontece dos dois lados. Tem gente que tem vontade de doar, fazer trabalho vokuntário e ações de caridade mas não faz ideia de por onde começar, não conhece ONGs, não sabe o que elas estão precisando e nem como ajudar. E tem ONG precisando de apoio, principalmente uma que está começando agora e depende de redes sociais com poucos seguidores para encontrar essas pessoas. Como as informações ficam espalhadas em vários lugares, quem quer ajudar pode acabar ficando perdido, enquanto a organização continua sem conseguir o apoio que precisa.
 
 ## 2. Justificativa
 
-Escolhi esse tema porque achei interessante trabalhar com uma dificuldade em que existe gente querendo ajudar e gente precisando dessa ajuda, mas falta uma forma mais fácil de conectar os dois lados. Principalmente pensando nas ONGs menores, que podem estar fazendo um trabalho importante e ainda não ter visibilidade. O que me motivou foi a possibilidade de usar o projeto para facilitar esse encontro e dar mais espaço para essas organizações mostrarem o que fazem e do que precisam.
+Escolhi esse tema porque achei interessante trabalhar com uma dificuldade em que existe gente querendo ajudar e gente precisando dessa ajuda, mas falta uma forma mais fácil de conectar os dois lados. Eu mesmo sinto que me enquadro nisto, tenho disposição e vontade de fazer ações de caridade, mas não sei por onde começar. E principalmente pensando nas ONGs menores, que podem estar fazendo um trabalho importante e ainda não ter visibilidade. O que me motivou foi a possibilidade de usar o projeto para facilitar esse encontro e dar mais espaço para essas organizações mostrarem o que fazem e do que precisam. Também existem motivações religiosas cristãs da minha parte, o próprio nome DAI foi inspirado em passagens bíblicas. “Dá a quem te pedir e não te desvies daquele que quiser que lhe emprestes.” Mateus 5:42.
 
 ## 3. Proposta
 
